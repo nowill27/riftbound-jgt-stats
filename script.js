@@ -117,6 +117,9 @@ function buildRounds(rawRows) {
       jugador, rival, leyendaJugador, leyendaRival,
       formato, jugadas, victoriasJugador, victoriasRival, ganador,
       notas: row["Notas / Observaciones"],
+      amenazas: row["Amenazas a tener en cuenta"],
+      sideboardOtp: row["Sideboard OTP"],
+      sideboardOtd: row["Sideboard OTD"],
     });
   });
 
@@ -351,6 +354,59 @@ function renderHistory(matches) {
   }).join("");
 }
 
+function renderComments(matches) {
+  const el = document.getElementById("comments");
+
+  const withNotes = [...matches]
+    .reverse()
+    .filter(m => (m.notas && String(m.notas).trim()) || (m.amenazas && String(m.amenazas).trim()));
+
+  if (!withNotes.length) {
+    el.innerHTML = `<div class="loading-row">Nadie ha dejado anotaciones todavía.</div>`;
+    return;
+  }
+
+  el.innerHTML = withNotes.map(m => {
+    const fecha = m.marca ? formatFecha(m.marca) : "";
+    const rows = [];
+    if (m.notas && String(m.notas).trim()) {
+      rows.push(`
+        <div class="comment-card__row">
+          <span class="comment-card__tag">Nota</span>
+          <span>${escapeHtml(m.notas)}</span>
+        </div>
+      `);
+    }
+    if (m.amenazas && String(m.amenazas).trim()) {
+      rows.push(`
+        <div class="comment-card__row comment-card__row--amenaza">
+          <span class="comment-card__tag">Amenaza</span>
+          <span>${escapeHtml(m.amenazas)}</span>
+        </div>
+      `);
+    }
+
+    return `
+      <div class="comment-card">
+        <div class="comment-card__head">
+          <span class="comment-card__matchup">
+            <b>${m.jugador}</b> (${m.leyendaJugador || "?"}) <span class="vs">vs</span>
+            <b>${m.rival}</b> (${m.leyendaRival || "?"})
+          </span>
+          <span class="comment-card__date">${fecha}</span>
+        </div>
+        <div class="comment-card__body">${rows.join("")}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
 function formatFecha(v) {
   // gviz puede devolver fechas como "Date(2026,6,27,20,59,23)" en el valor crudo,
   // o ya formateadas si venían como texto. Cubrimos ambos casos.
@@ -363,10 +419,37 @@ function formatFecha(v) {
 }
 
 /* ============================================================
-   5. Init
+   5. Pestañas
+   ============================================================ */
+
+function setupTabs() {
+  const buttons = Array.from(document.querySelectorAll(".tabs__btn"));
+  const views = Array.from(document.querySelectorAll(".view"));
+
+  function activate(targetId, updateHash) {
+    views.forEach(v => v.classList.toggle("view--active", v.id === targetId));
+    buttons.forEach(b => b.setAttribute("aria-selected", String(b.dataset.target === targetId)));
+    if (updateHash) history.replaceState(null, "", `#${targetId}`);
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => activate(btn.dataset.target, true));
+  });
+
+  const fromHash = window.location.hash.replace("#", "");
+  const validIds = views.map(v => v.id);
+  if (validIds.includes(fromHash)) {
+    activate(fromHash, false);
+  }
+}
+
+/* ============================================================
+   6. Init
    ============================================================ */
 
 async function init() {
+  setupTabs();
+
   try {
     const raw = await fetchSheetRows(CONFIG.SHEET_ID, CONFIG.SHEET_TAB);
     const { rounds, matches } = buildRounds(raw);
@@ -380,6 +463,7 @@ async function init() {
     renderLeyendas(leyendaWinrate);
     renderMatrix(matrix);
     renderHistory(matches);
+    renderComments(matches);
 
   } catch (err) {
     console.error(err);
