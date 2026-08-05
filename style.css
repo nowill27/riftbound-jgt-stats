@@ -101,10 +101,16 @@ body {
 }
 
 .hero__sub {
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto;
   color: var(--parchment-dim);
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .hero__sub { max-width: 420px; }
+  .pyramid-break { display: none; }
 }
 
 .kpi-row {
@@ -357,7 +363,8 @@ main {
 
 .leyenda-row__track {
   height: 10px;
-  background: var(--ink-3);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: 2px;
   overflow: hidden;
   position: relative;
@@ -366,6 +373,7 @@ main {
 .leyenda-row__fill {
   height: 100%;
   border-radius: 2px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.35);
 }
 
 .leyenda-row__stats {
@@ -460,7 +468,7 @@ td.cell--empty {
   display: inline-block;
 }
 .swatch--low { background: var(--crimson); }
-.swatch--mid { background: #7a7143; }
+.swatch--mid { background: #ce8144; }
 .swatch--high { background: var(--gold); }
 .swatch--empty { background: var(--ink-3); border: 1px solid var(--line); }
 
