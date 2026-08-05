@@ -261,10 +261,47 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
     </div>
   `;
 
-  renderLeaderSpotlight(lider);
+  renderLeaderSpotlight(lider, matches);
+  renderRunnersUp(leaderboard);
 }
 
-function renderLeaderSpotlight(lider) {
+function renderRunnersUp(leaderboard) {
+  const el = document.getElementById("runners-up");
+  if (!el) return;
+
+  const runners = leaderboard.slice(1, 3); // 2º y 3º puesto
+  if (!runners.length) { el.innerHTML = ""; return; }
+
+  el.innerHTML = runners.map((p, i) => {
+    const rank = i + 2;
+    const record = `${p.ganados}V - ${p.perdidos}D${p.empatados ? ` - ${p.empatados}E` : ""}`;
+    return `
+      <div class="runner-card">
+        <span class="runner-card__rank">${rank}</span>
+        <div class="runner-card__body">
+          <span class="runner-card__name">${escapeHtml(p.nombre)}</span>
+          <span class="runner-card__stats">${record} · ${p.jugados} partidas</span>
+        </div>
+        <span class="runner-card__pct">${fmtPct(p.winrate)}</span>
+      </div>
+    `;
+  }).join("");
+
+function computeFavoriteLegend(matches, playerName) {
+  const counts = {};
+  matches.forEach(m => {
+    if (m.jugador === playerName && m.leyendaJugador) {
+      counts[m.leyendaJugador] = (counts[m.leyendaJugador] || 0) + 1;
+    }
+    if (m.rival === playerName && m.leyendaRival) {
+      counts[m.leyendaRival] = (counts[m.leyendaRival] || 0) + 1;
+    }
+  });
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  return entries.length ? { leyenda: entries[0][0], veces: entries[0][1] } : null;
+}
+
+function renderLeaderSpotlight(lider, matches) {
   const el = document.getElementById("leader-spotlight");
   if (!el) return;
 
@@ -274,12 +311,19 @@ function renderLeaderSpotlight(lider) {
   const fallbackCandidates = buildPlayerImgCandidates("generic");
   const allCandidates = [...candidates, ...fallbackCandidates];
 
+  const favLegend = computeFavoriteLegend(matches, lider.nombre);
+  const record = `${lider.ganados}V - ${lider.perdidos}D${lider.empatados ? ` - ${lider.empatados}E` : ""}`;
+
   el.innerHTML = `
     <img class="leader-spotlight__img" id="leader-spotlight-img" src="${allCandidates[0]}" alt="${escapeHtml(lider.nombre)}">
     <div class="leader-spotlight__info">
       <span class="leader-spotlight__label">Jugador líder</span>
       <span class="leader-spotlight__name">${escapeHtml(lider.nombre)}</span>
       <span class="leader-spotlight__pct">${fmtPct(lider.winrate)} de victorias · ${lider.jugados} partidas</span>
+      <div class="leader-spotlight__stats">
+        <span class="leader-spotlight__stat"><b>${record}</b></span>
+        ${favLegend ? `<span class="leader-spotlight__stat">Leyenda favorita: <b>${escapeHtml(favLegend.leyenda)}</b> · ${favLegend.veces}p</span>` : ""}
+      </div>
     </div>
   `;
 
