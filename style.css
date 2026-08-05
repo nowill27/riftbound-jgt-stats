@@ -101,15 +101,15 @@ body {
 }
 
 .hero__sub {
-  max-width: 620px;
+  max-width: 640px;
   margin: 0 auto;
-  color: var(--parchment-dim);
-  font-size: 14px;
-  line-height: 1.7;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 @media (max-width: 640px) {
-  .hero__sub { max-width: 420px; }
+  .hero__sub { max-width: 380px; }
   .pyramid-break { display: none; }
 }
 
@@ -206,6 +206,20 @@ body {
   color: var(--teal);
 }
 
+.leader-spotlight__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 4px;
+}
+
+.leader-spotlight__stat {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+.leader-spotlight__stat b { color: var(--gold-soft); font-weight: 600; }
+
 @media (max-width: 620px) {
   .leader-spotlight:has(.leader-spotlight__img) {
     flex-direction: column;
@@ -214,6 +228,67 @@ body {
   }
   .leader-spotlight__img { width: 140px; }
   .leader-spotlight__name { font-size: 32px; }
+  .leader-spotlight__stats { justify-content: center; }
+}
+
+/* ============================================================
+   Runners-up (2º y 3º puesto)
+   ============================================================ */
+.runners-up {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.runner-card {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+
+.runner-card__rank {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--gold-dim);
+  width: 22px;
+  flex: none;
+  text-align: center;
+}
+
+.runner-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.runner-card__name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--parchment);
+}
+
+.runner-card__stats {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.runner-card__pct {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--teal);
+  flex: none;
 }
 
 /* ============================================================
