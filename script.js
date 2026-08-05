@@ -10,7 +10,7 @@ const CONFIG = {
   //    con el enlace" -> "Lector". No hace falta "Publicar en la web".
   // 2. Copia el ID de la URL:
   //    https://docs.google.com/spreadsheets/d/ >>ESTE_TROZO<< /edit
-  SHEET_ID: "1fqDXw0rzwc9KM2VKaLbXHS1RPgV6NR_3FkCOVkbFxic",
+  SHEET_ID: "PON_AQUI_EL_ID_DE_TU_GOOGLE_SHEET",
 
   // Nombre exacto de la pestaña con las respuestas del formulario
   SHEET_TAB: "Respuestas_formulario",
@@ -282,14 +282,11 @@ function renderLeyendas(leyendaWinrate) {
 }
 
 function colorForWinrate(w) {
-  // degradado carmesí (0) -> dorado (1), vía un tono neutro en 0.5
-  const crimson = [181, 66, 63];
-  const mid = [122, 113, 67];
-  const gold = [201, 162, 39];
-  let c1, c2, t;
-  if (w <= 0.5) { c1 = crimson; c2 = mid; t = w / 0.5; }
-  else { c1 = mid; c2 = gold; t = (w - 0.5) / 0.5; }
-  const rgb = c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
+  // degradado directo carmesí (0) -> dorado (1), sin tono intermedio oscuro
+  // (un tono medio apagado se camuflaba contra el fondo del raíl)
+  const crimson = [196, 82, 78];
+  const gold = [216, 176, 58];
+  const rgb = crimson.map((v, i) => Math.round(v + (gold[i] - v) * w));
   return `rgb(${rgb.join(",")})`;
 }
 
