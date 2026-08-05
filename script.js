@@ -27,11 +27,12 @@ const CONFIG = {
 
   // Carpeta donde subirás las fotos de cada jugador (la que ya
   // existe en tu repo: assets/imgs). Nombre de archivo esperado:
-  // "<nombre_normalizado>_wins.png" — p.ej. "alvaro_wins.png".
-  // Si no existe la imagen de un jugador concreto, se usa
-  // automáticamente "generic_wins.png" como respaldo.
+  // "<nombre_normalizado>_wins.<extensión>" — p.ej. "alvaro_wins.jpg".
+  // Prueba automáticamente estas extensiones en este orden hasta
+  // encontrar una que exista; si ninguna existe para ese jugador,
+  // cae a "generic_wins.<extensión>" con el mismo orden de pruebas.
   PLAYER_IMG_PATH: "assets/imgs/",
-  PLAYER_IMG_EXT: "png",
+  PLAYER_IMG_EXTS: ["jpg", "jpeg", "png", "webp"],
 };
 
 // Convierte un nombre de jugador en el slug de archivo esperado:
@@ -241,8 +242,9 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
   const bo1 = matches.filter(m => m.formato === "BO1").length;
   const bo3 = matches.filter(m => m.formato === "BO3").length;
 
-  const genericSrc = `${CONFIG.PLAYER_IMG_PATH}generic_wins.${CONFIG.PLAYER_IMG_EXT}`;
-  const liderSrc = lider ? `${CONFIG.PLAYER_IMG_PATH}${slugifyName(lider.nombre)}_wins.${CONFIG.PLAYER_IMG_EXT}` : genericSrc;
+  const candidates = lider ? buildPlayerImgCandidates(slugifyName(lider.nombre)) : [];
+  const fallbackCandidates = buildPlayerImgCandidates("generic");
+  const allCandidates = [...candidates, ...fallbackCandidates];
 
   el.innerHTML = `
     <div class="kpi">
@@ -250,7 +252,7 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
       <span class="kpi__label">Partidas registradas</span>
     </div>
     <div class="kpi kpi--leader">
-      ${lider ? `<img class="kpi__avatar" id="kpi-leader-avatar" src="${liderSrc}" alt="${escapeHtml(lider.nombre)}">` : ""}
+      ${lider ? `<img class="kpi__avatar" id="kpi-leader-avatar" src="${allCandidates[0]}" alt="${escapeHtml(lider.nombre)}">` : ""}
       <span class="kpi__value">${lider ? lider.nombre : "—"}</span>
       <span class="kpi__label">Jugador líder ${lider ? `(${fmtPct(lider.winrate)})` : ""}</span>
     </div>
@@ -265,17 +267,21 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
   `;
 
   const avatar = document.getElementById("kpi-leader-avatar");
-  if (avatar) wirePlayerImgFallback(avatar, genericSrc);
+  if (avatar) wireImageFallbackChain(avatar, allCandidates);
 }
 
-// Si la foto del jugador falla, prueba con la genérica; si esa
-// también falla, oculta la imagen en vez de mostrar el icono roto.
-function wirePlayerImgFallback(imgEl, genericSrc) {
-  let triedGeneric = false;
+function buildPlayerImgCandidates(nameSlug) {
+  return CONFIG.PLAYER_IMG_EXTS.map(ext => `${CONFIG.PLAYER_IMG_PATH}${nameSlug}_wins.${ext}`);
+}
+
+// Prueba cada URL de la lista en orden; si todas fallan, oculta la
+// imagen en vez de mostrar el icono de "imagen rota".
+function wireImageFallbackChain(imgEl, sources) {
+  let idx = 0;
   imgEl.addEventListener("error", () => {
-    if (!triedGeneric && imgEl.src !== genericSrc) {
-      triedGeneric = true;
-      imgEl.src = genericSrc;
+    idx++;
+    if (idx < sources.length) {
+      imgEl.src = sources[idx];
     } else {
       imgEl.style.display = "none";
     }
