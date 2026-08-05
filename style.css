@@ -145,7 +145,61 @@ body {
 }
 
 /* ============================================================
-   Sections
+   Tabs
+   ============================================================ */
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 0 24px;
+  background: rgba(18, 20, 28, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tabs__btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 18px 16px 15px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tabs__btn:hover { color: var(--parchment); }
+
+.tabs__btn[aria-selected="true"] {
+  color: var(--gold-soft);
+  border-bottom-color: var(--gold);
+}
+
+.tabs__num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--gold-dim);
+}
+.tabs__btn[aria-selected="true"] .tabs__num { color: var(--gold); }
+
+@media (max-width: 620px) {
+  .tabs__btn { padding: 14px 12px 12px; font-size: 13px; }
+}
+
+/* ============================================================
+   Sections / views
    ============================================================ */
 main {
   max-width: 1080px;
@@ -153,8 +207,19 @@ main {
   padding: 0 24px;
 }
 
+.view { display: none; }
+.view.view--active {
+  display: block;
+  animation: fade-in 0.25s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .section {
-  padding: 72px 0 8px;
+  padding: 40px 0 8px;
 }
 
 .section__head {
@@ -444,6 +509,69 @@ td.cell--empty {
 
 @media (max-width: 620px) {
   .history__item { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* ============================================================
+   Comments
+   ============================================================ */
+.comment-card {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.comment-card:last-child { border-bottom: none; }
+
+.comment-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.comment-card__matchup {
+  font-size: 14px;
+  color: var(--parchment);
+}
+.comment-card__matchup b { color: var(--gold-soft); }
+.comment-card__matchup .vs { color: var(--muted); margin: 0 6px; font-size: 12px; }
+
+.comment-card__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.comment-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comment-card__row {
+  font-size: 13px;
+  color: var(--parchment-dim);
+  display: flex;
+  gap: 8px;
+}
+
+.comment-card__tag {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+  border-radius: 3px;
+  padding: 2px 6px;
+  height: fit-content;
+  white-space: nowrap;
+}
+.comment-card__row--amenaza .comment-card__tag {
+  color: var(--crimson-soft);
+  border-color: var(--crimson-soft);
 }
 
 /* ============================================================
