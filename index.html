@@ -1,1 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riftbound JGT · Archivo de Partidas</title>
+<meta name="description" content="Registro y estadísticas de las partidas de Riftbound del grupo.">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="rune-noise" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="hero__inner">
+    <p class="eyebrow">Archivo de la orden · Registro de combates</p>
+    <h1 class="hero__title">RIFTBOUND<span class="hero__title-accent">JGT</span></h1>
+    <p class="hero__sub">Cada partida queda grabada en la runa. Aquí se lee la historia completa del grupo: quién domina, qué leyendas temen enfrentarse, y quién le debe una revancha a quién.</p>
+
+    <div class="kpi-row" id="kpi-row">
+      <div class="kpi kpi--loading">
+        <span class="kpi__value">—</span>
+        <span class="kpi__label">Partidas registradas</span>
+      </div>
+      <div class="kpi kpi--loading">
+        <span class="kpi__value">—</span>
+        <span class="kpi__label">Jugador líder</span>
+      </div>
+      <div class="kpi kpi--loading">
+        <span class="kpi__value">—</span>
+        <span class="kpi__label">Leyenda más jugada</span>
+      </div>
+      <div class="kpi kpi--loading">
+        <span class="kpi__value">—</span>
+        <span class="kpi__label">Formato BO1 / BO3</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="section" id="section-leaderboard">
+    <div class="section__head">
+      <span class="section__num">I</span>
+      <div>
+        <h2 class="section__title">Tabla de invocadores</h2>
+        <p class="section__desc">Clasificación por ratio de victorias, de mayor a menor dominio.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div id="leaderboard" class="leaderboard">
+        <div class="loading-row">Consultando el archivo…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="section-leyendas">
+    <div class="section__head">
+      <span class="section__num">II</span>
+      <div>
+        <h2 class="section__title">Poder de las leyendas</h2>
+        <p class="section__desc">Winrate global de cada leyenda, sin importar quién la haya jugado.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div id="leyendas-chart" class="leyendas-chart">
+        <div class="loading-row">Calculando el poder rúnico…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="section-matrix">
+    <div class="section__head">
+      <span class="section__num">III</span>
+      <div>
+        <h2 class="section__title">La cuadrícula de enfrentamientos</h2>
+        <p class="section__desc">Winrate de cada leyenda (fila) contra cada rival (columna). Dorado domina, carmesí sucumbe. Pasa el cursor sobre una celda para ver el detalle.</p>
+      </div>
+    </div>
+    <div class="panel panel--matrix">
+      <div id="matrix-wrap" class="matrix-wrap">
+        <div class="loading-row">Trazando las runas de combate…</div>
+      </div>
+      <div class="matrix-legend">
+        <span class="matrix-legend__item"><i class="swatch swatch--low"></i>Desfavorable</span>
+        <span class="matrix-legend__item"><i class="swatch swatch--mid"></i>Equilibrado</span>
+        <span class="matrix-legend__item"><i class="swatch swatch--high"></i>Dominante</span>
+        <span class="matrix-legend__item"><i class="swatch swatch--empty"></i>Sin datos suficientes</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="section-history">
+    <div class="section__head">
+      <span class="section__num">IV</span>
+      <div>
+        <h2 class="section__title">Crónica reciente</h2>
+        <p class="section__desc">Últimas partidas registradas en el archivo.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div id="history" class="history">
+        <div class="loading-row">Desempolvando pergaminos…</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Datos sincronizados desde el archivo de Google Sheets del grupo · Actualizado en cada carga de página</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
