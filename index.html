@@ -43,11 +43,28 @@
   </div>
 </header>
 
+<nav class="tabs" id="tabs" aria-label="Secciones del archivo">
+  <button class="tabs__btn" data-target="section-leaderboard" aria-selected="true">
+    <span class="tabs__num">I</span> Invocadores
+  </button>
+  <button class="tabs__btn" data-target="section-leyendas" aria-selected="false">
+    <span class="tabs__num">II</span> Leyendas
+  </button>
+  <button class="tabs__btn" data-target="section-matrix" aria-selected="false">
+    <span class="tabs__num">III</span> Enfrentamientos
+  </button>
+  <button class="tabs__btn" data-target="section-history" aria-selected="false">
+    <span class="tabs__num">IV</span> Crónica
+  </button>
+  <button class="tabs__btn" data-target="section-comments" aria-selected="false">
+    <span class="tabs__num">V</span> Comentarios
+  </button>
+</nav>
+
 <main>
 
-  <section class="section" id="section-leaderboard">
+  <section class="section view view--active" id="section-leaderboard">
     <div class="section__head">
-      <span class="section__num">I</span>
       <div>
         <h2 class="section__title">Tabla de invocadores</h2>
         <p class="section__desc">Clasificación por ratio de victorias, de mayor a menor dominio.</p>
@@ -60,9 +77,8 @@
     </div>
   </section>
 
-  <section class="section" id="section-leyendas">
+  <section class="section view" id="section-leyendas">
     <div class="section__head">
-      <span class="section__num">II</span>
       <div>
         <h2 class="section__title">Poder de las leyendas</h2>
         <p class="section__desc">Winrate global de cada leyenda, sin importar quién la haya jugado.</p>
@@ -75,9 +91,8 @@
     </div>
   </section>
 
-  <section class="section" id="section-matrix">
+  <section class="section view" id="section-matrix">
     <div class="section__head">
-      <span class="section__num">III</span>
       <div>
         <h2 class="section__title">La cuadrícula de enfrentamientos</h2>
         <p class="section__desc">Winrate de cada leyenda (fila) contra cada rival (columna). Dorado domina, carmesí sucumbe. Pasa el cursor sobre una celda para ver el detalle.</p>
@@ -96,9 +111,8 @@
     </div>
   </section>
 
-  <section class="section" id="section-history">
+  <section class="section view" id="section-history">
     <div class="section__head">
-      <span class="section__num">IV</span>
       <div>
         <h2 class="section__title">Crónica reciente</h2>
         <p class="section__desc">Últimas partidas registradas en el archivo.</p>
@@ -107,6 +121,20 @@
     <div class="panel">
       <div id="history" class="history">
         <div class="loading-row">Desempolvando pergaminos…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section view" id="section-comments">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Comentarios de la orden</h2>
+        <p class="section__desc">Notas y amenazas anotadas en cada enfrentamiento — lo que cada uno se guardó para la próxima vez.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div id="comments" class="comments">
+        <div class="loading-row">Releyendo anotaciones…</div>
       </div>
     </div>
   </section>
