@@ -242,17 +242,12 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
   const bo1 = matches.filter(m => m.formato === "BO1").length;
   const bo3 = matches.filter(m => m.formato === "BO3").length;
 
-  const candidates = lider ? buildPlayerImgCandidates(slugifyName(lider.nombre)) : [];
-  const fallbackCandidates = buildPlayerImgCandidates("generic");
-  const allCandidates = [...candidates, ...fallbackCandidates];
-
   el.innerHTML = `
     <div class="kpi">
       <span class="kpi__value">${totalPartidas}</span>
       <span class="kpi__label">Partidas registradas</span>
     </div>
-    <div class="kpi kpi--leader">
-      ${lider ? `<img class="kpi__avatar" id="kpi-leader-avatar" src="${allCandidates[0]}" alt="${escapeHtml(lider.nombre)}">` : ""}
+    <div class="kpi">
       <span class="kpi__value">${lider ? lider.nombre : "—"}</span>
       <span class="kpi__label">Jugador líder ${lider ? `(${fmtPct(lider.winrate)})` : ""}</span>
     </div>
@@ -266,8 +261,30 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
     </div>
   `;
 
-  const avatar = document.getElementById("kpi-leader-avatar");
-  if (avatar) wireImageFallbackChain(avatar, allCandidates);
+  renderLeaderSpotlight(lider);
+}
+
+function renderLeaderSpotlight(lider) {
+  const el = document.getElementById("leader-spotlight");
+  if (!el) return;
+
+  if (!lider) { el.innerHTML = ""; return; }
+
+  const candidates = buildPlayerImgCandidates(slugifyName(lider.nombre));
+  const fallbackCandidates = buildPlayerImgCandidates("generic");
+  const allCandidates = [...candidates, ...fallbackCandidates];
+
+  el.innerHTML = `
+    <img class="leader-spotlight__img" id="leader-spotlight-img" src="${allCandidates[0]}" alt="${escapeHtml(lider.nombre)}">
+    <div class="leader-spotlight__info">
+      <span class="leader-spotlight__label">Jugador líder</span>
+      <span class="leader-spotlight__name">${escapeHtml(lider.nombre)}</span>
+      <span class="leader-spotlight__pct">${fmtPct(lider.winrate)} de victorias · ${lider.jugados} partidas</span>
+    </div>
+  `;
+
+  const img = document.getElementById("leader-spotlight-img");
+  if (img) wireImageFallbackChain(img, allCandidates);
 }
 
 function buildPlayerImgCandidates(nameSlug) {
