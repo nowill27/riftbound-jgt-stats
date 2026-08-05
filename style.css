@@ -1,1 +1,465 @@
+/* ============================================================
+   RIFTBOUND JGT — Design tokens
+   ============================================================ */
+:root {
+  --ink: #12141c;
+  --ink-2: #191c27;
+  --ink-3: #1f2330;
+  --line: #2c3040;
 
+  --gold: #c9a227;
+  --gold-soft: #e8c766;
+  --gold-dim: #7a651f;
+
+  --teal: #35c9c1;
+  --crimson: #b5423f;
+  --crimson-soft: #d97a76;
+
+  --parchment: #ece6d8;
+  --parchment-dim: #b8b3a6;
+  --muted: #8b8fa3;
+
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius: 6px;
+  --shadow-panel: 0 12px 40px -20px rgba(0,0,0,0.7);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+/* subtle grain overlay to keep the flat dark bg from feeling like a template */
+.rune-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  background-image:
+    radial-gradient(circle at 20% 20%, var(--gold) 0, transparent 1px),
+    radial-gradient(circle at 80% 60%, var(--gold) 0, transparent 1px),
+    radial-gradient(circle at 50% 90%, var(--teal) 0, transparent 1px);
+  background-size: 140px 140px, 220px 220px, 180px 180px;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero {
+  position: relative;
+  padding: 88px 24px 56px;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201,162,39,0.14), transparent 60%),
+    var(--ink);
+}
+
+.hero__inner {
+  max-width: 920px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin: 0 0 18px;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(40px, 8vw, 76px);
+  letter-spacing: 0.03em;
+  margin: 0 0 20px;
+  color: var(--parchment);
+}
+
+.hero__title-accent {
+  color: var(--gold);
+  margin-left: 0.15em;
+}
+
+.hero__sub {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--parchment-dim);
+  font-size: 16px;
+}
+
+.kpi-row {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.kpi {
+  background: var(--ink-2);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.kpi__value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold-soft);
+}
+
+.kpi__label {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============================================================
+   Sections
+   ============================================================ */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 72px 0 8px;
+}
+
+.section__head {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.section__num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.section__title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin: 0 0 6px;
+  color: var(--parchment);
+}
+
+.section__desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 620px;
+}
+
+.panel {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+  padding: 8px;
+}
+
+.loading-row {
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ============================================================
+   Leaderboard
+   ============================================================ */
+.leaderboard__row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.leaderboard__row:last-child { border-bottom: none; }
+
+.leaderboard__rank {
+  font-family: var(--font-display);
+  color: var(--gold-dim);
+  font-size: 15px;
+}
+.leaderboard__row--1 .leaderboard__rank { color: var(--gold); font-size: 19px; }
+.leaderboard__row--2 .leaderboard__rank { color: var(--gold-soft); }
+.leaderboard__row--3 .leaderboard__rank { color: var(--parchment-dim); }
+
+.leaderboard__name {
+  font-weight: 600;
+  color: var(--parchment);
+}
+
+.leaderboard__record {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.leaderboard__bar-wrap {
+  width: 140px;
+  height: 6px;
+  background: var(--ink-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.leaderboard__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-soft));
+}
+
+.leaderboard__pct {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--teal);
+  min-width: 48px;
+  text-align: right;
+}
+
+@media (max-width: 620px) {
+  .leaderboard__row { grid-template-columns: 24px 1fr auto; row-gap: 6px; }
+  .leaderboard__bar-wrap { display: none; }
+}
+
+/* ============================================================
+   Leyendas winrate bars
+   ============================================================ */
+.leyendas-chart {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leyenda-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 90px;
+  align-items: center;
+  gap: 14px;
+}
+
+.leyenda-row__name {
+  font-size: 13px;
+  color: var(--parchment-dim);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leyenda-row__track {
+  height: 10px;
+  background: var(--ink-3);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.leyenda-row__fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.leyenda-row__stats {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.leyenda-row__stats b { color: var(--gold-soft); }
+
+/* ============================================================
+   Matrix (signature element)
+   ============================================================ */
+.panel--matrix { overflow-x: auto; }
+
+.matrix-wrap {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+table.matrix {
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-family: var(--font-mono);
+}
+
+table.matrix th, table.matrix td {
+  min-width: 46px;
+  height: 46px;
+  text-align: center;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+table.matrix thead th {
+  background: transparent;
+  color: var(--muted);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 500;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+table.matrix tbody th {
+  text-align: right;
+  padding-right: 10px;
+  color: var(--parchment-dim);
+  font-weight: 500;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+}
+
+td.cell {
+  cursor: default;
+  color: #0d0e13;
+  font-weight: 600;
+  transition: transform 0.12s ease, outline 0.12s ease;
+  position: relative;
+}
+
+td.cell:hover {
+  transform: scale(1.12);
+  outline: 1.5px solid var(--gold-soft);
+  z-index: 2;
+}
+
+td.cell--empty {
+  background: var(--ink-3);
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.matrix-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 4px 16px 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.matrix-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.swatch--low { background: var(--crimson); }
+.swatch--mid { background: #7a7143; }
+.swatch--high { background: var(--gold); }
+.swatch--empty { background: var(--ink-3); border: 1px solid var(--line); }
+
+/* ============================================================
+   History
+   ============================================================ */
+.history__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.history__item:last-child { border-bottom: none; }
+
+.history__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.history__matchup {
+  font-size: 14px;
+  color: var(--parchment);
+}
+.history__matchup b { color: var(--gold-soft); font-weight: 600; }
+.history__matchup .vs { color: var(--muted); margin: 0 8px; font-size: 12px; }
+
+.history__score {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.history__score--win { color: var(--teal); border: 1px solid var(--teal); }
+.history__score--loss { color: var(--crimson-soft); border: 1px solid var(--crimson-soft); }
+.history__score--draw { color: var(--muted); border: 1px solid var(--muted); }
+
+@media (max-width: 620px) {
+  .history__item { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer {
+  margin-top: 96px;
+  padding: 28px 24px 60px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+/* focus visibility */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--gold-soft);
+  outline-offset: 2px;
+}
