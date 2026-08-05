@@ -286,6 +286,7 @@ function renderRunnersUp(leaderboard) {
       </div>
     `;
   }).join("");
+}
 
 function computeFavoriteLegend(matches, playerName) {
   const counts = {};
