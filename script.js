@@ -24,7 +24,26 @@ const CONFIG = {
 
   // Cuántas partidas recientes mostrar en la Crónica
   HISTORY_LIMIT: 12,
+
+  // Carpeta donde subirás las fotos de cada jugador (la que ya
+  // existe en tu repo: assets/imgs). Nombre de archivo esperado:
+  // "<nombre_normalizado>_wins.png" — p.ej. "alvaro_wins.png".
+  // Si no existe la imagen de un jugador concreto, se usa
+  // automáticamente "generic_wins.png" como respaldo.
+  PLAYER_IMG_PATH: "assets/imgs/",
+  PLAYER_IMG_EXT: "png",
 };
+
+// Convierte un nombre de jugador en el slug de archivo esperado:
+// minúsculas, sin tildes, sin espacios ("Dani GT" -> "dani_gt")
+function slugifyName(name) {
+  return String(name)
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
 
 /* ============================================================
    1. Fetch + parseo de Google Sheets (gviz)
@@ -222,12 +241,16 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
   const bo1 = matches.filter(m => m.formato === "BO1").length;
   const bo3 = matches.filter(m => m.formato === "BO3").length;
 
+  const genericSrc = `${CONFIG.PLAYER_IMG_PATH}generic_wins.${CONFIG.PLAYER_IMG_EXT}`;
+  const liderSrc = lider ? `${CONFIG.PLAYER_IMG_PATH}${slugifyName(lider.nombre)}_wins.${CONFIG.PLAYER_IMG_EXT}` : genericSrc;
+
   el.innerHTML = `
     <div class="kpi">
       <span class="kpi__value">${totalPartidas}</span>
       <span class="kpi__label">Partidas registradas</span>
     </div>
-    <div class="kpi">
+    <div class="kpi kpi--leader">
+      ${lider ? `<img class="kpi__avatar" id="kpi-leader-avatar" src="${liderSrc}" alt="${escapeHtml(lider.nombre)}">` : ""}
       <span class="kpi__value">${lider ? lider.nombre : "—"}</span>
       <span class="kpi__label">Jugador líder ${lider ? `(${fmtPct(lider.winrate)})` : ""}</span>
     </div>
@@ -240,6 +263,23 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
       <span class="kpi__label">Formato BO1 / BO3</span>
     </div>
   `;
+
+  const avatar = document.getElementById("kpi-leader-avatar");
+  if (avatar) wirePlayerImgFallback(avatar, genericSrc);
+}
+
+// Si la foto del jugador falla, prueba con la genérica; si esa
+// también falla, oculta la imagen en vez de mostrar el icono roto.
+function wirePlayerImgFallback(imgEl, genericSrc) {
+  let triedGeneric = false;
+  imgEl.addEventListener("error", () => {
+    if (!triedGeneric && imgEl.src !== genericSrc) {
+      triedGeneric = true;
+      imgEl.src = genericSrc;
+    } else {
+      imgEl.style.display = "none";
+    }
+  });
 }
 
 function renderLeaderboard(leaderboard) {
@@ -281,14 +321,17 @@ function renderLeyendas(leyendaWinrate) {
   }).join("");
 }
 
-function colorForWinrate(w) {
-  // degradado directo carmesí (0) -> dorado (1), sin tono intermedio oscuro
-  // (un tono medio apagado se camuflaba contra el fondo del raíl)
+function colorForWinrate(w, highColor) {
+  // degradado directo carmesí (0) -> color de destino (1)
   const crimson = [196, 82, 78];
-  const gold = [216, 176, 58];
-  const rgb = crimson.map((v, i) => Math.round(v + (gold[i] - v) * w));
+  const high = highColor || [216, 176, 58]; // dorado por defecto
+  const rgb = crimson.map((v, i) => Math.round(v + (high[i] - v) * w));
   return `rgb(${rgb.join(",")})`;
 }
+
+// Verde/teal de "victoria" — más representativo que el dorado cuando
+// el winrate se acerca al 100%, usado solo en la cuadrícula de matchups.
+const VICTORY_COLOR = [45, 196, 140];
 
 function renderMatrix({ leyendas, pares }) {
   const wrap = document.getElementById("matrix-wrap");
@@ -312,7 +355,7 @@ function renderMatrix({ leyendas, pares }) {
         return;
       }
       const wr = cell.victorias / cell.jugadas;
-      const color = colorForWinrate(wr);
+      const color = colorForWinrate(wr, VICTORY_COLOR);
       html += `<td class="cell" style="background:${color}" title="${a} vs ${b}: ${fmtPct(wr)} (${cell.victorias}/${cell.jugadas})">${Math.round(wr * 100)}</td>`;
     });
     html += `</tr>`;
@@ -351,6 +394,17 @@ function renderHistory(matches) {
   }).join("");
 }
 
+function getAllLeyendas(matches) {
+  // Se deriva de los datos en cada carga, así que una leyenda nueva
+  // aparece sola en el filtro sin tocar el código.
+  const set = new Set();
+  matches.forEach(m => {
+    if (m.leyendaJugador) set.add(m.leyendaJugador);
+    if (m.leyendaRival) set.add(m.leyendaRival);
+  });
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+}
+
 function renderComments(matches) {
   const el = document.getElementById("comments");
 
@@ -363,39 +417,69 @@ function renderComments(matches) {
     return;
   }
 
-  el.innerHTML = withNotes.map(m => {
-    const fecha = m.marca ? formatFecha(m.marca) : "";
-    const rows = [];
-    if (m.notas && String(m.notas).trim()) {
-      rows.push(`
-        <div class="comment-card__row">
-          <span class="comment-card__tag">Nota</span>
-          <span>${escapeHtml(m.notas)}</span>
-        </div>
-      `);
-    }
-    if (m.amenazas && String(m.amenazas).trim()) {
-      rows.push(`
-        <div class="comment-card__row comment-card__row--amenaza">
-          <span class="comment-card__tag">Amenaza</span>
-          <span>${escapeHtml(m.amenazas)}</span>
-        </div>
-      `);
+  const leyendasEnComentarios = getAllLeyendas(withNotes);
+
+  el.innerHTML = `
+    <div class="comments-filter">
+      <label for="comments-filter-select">Filtrar por leyenda</label>
+      <select id="comments-filter-select">
+        <option value="">Todas las leyendas</option>
+        ${leyendasEnComentarios.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("")}
+      </select>
+    </div>
+    <div id="comments-list"></div>
+  `;
+
+  const listEl = document.getElementById("comments-list");
+  const select = document.getElementById("comments-filter-select");
+
+  function paintList(filterLeyenda) {
+    const filtered = filterLeyenda
+      ? withNotes.filter(m => m.leyendaJugador === filterLeyenda || m.leyendaRival === filterLeyenda)
+      : withNotes;
+
+    if (!filtered.length) {
+      listEl.innerHTML = `<div class="loading-row">Nadie ha anotado nada sobre ${escapeHtml(filterLeyenda)} todavía.</div>`;
+      return;
     }
 
-    return `
-      <div class="comment-card">
-        <div class="comment-card__head">
-          <span class="comment-card__matchup">
-            <b>${m.jugador}</b> (${m.leyendaJugador || "?"}) <span class="vs">vs</span>
-            <b>${m.rival}</b> (${m.leyendaRival || "?"})
-          </span>
-          <span class="comment-card__date">${fecha}</span>
+    listEl.innerHTML = filtered.map(m => {
+      const fecha = m.marca ? formatFecha(m.marca) : "";
+      const rows = [];
+      if (m.notas && String(m.notas).trim()) {
+        rows.push(`
+          <div class="comment-card__row">
+            <span class="comment-card__tag">Nota</span>
+            <span>${escapeHtml(m.notas)}</span>
+          </div>
+        `);
+      }
+      if (m.amenazas && String(m.amenazas).trim()) {
+        rows.push(`
+          <div class="comment-card__row comment-card__row--amenaza">
+            <span class="comment-card__tag">Amenaza</span>
+            <span>${escapeHtml(m.amenazas)}</span>
+          </div>
+        `);
+      }
+
+      return `
+        <div class="comment-card">
+          <div class="comment-card__head">
+            <span class="comment-card__matchup">
+              <b>${m.jugador}</b> (${m.leyendaJugador || "?"}) <span class="vs">vs</span>
+              <b>${m.rival}</b> (${m.leyendaRival || "?"})
+            </span>
+            <span class="comment-card__date">${fecha}</span>
+          </div>
+          <div class="comment-card__body">${rows.join("")}</div>
         </div>
-        <div class="comment-card__body">${rows.join("")}</div>
-      </div>
-    `;
-  }).join("");
+      `;
+    }).join("");
+  }
+
+  select.addEventListener("change", () => paintList(select.value));
+  paintList("");
 }
 
 function escapeHtml(str) {
