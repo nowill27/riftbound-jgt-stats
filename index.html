@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Riftbound JGT · Archivo de Partidas</title>
-<meta name="description" content="Registro y estadísticas de las partidas de Riftbound del grupo.">
+<title>JGT Enjoyers · Riftbound Stats</title>
+<meta name="description" content="El marcador oficial del JGT: partidas, matchups y piques entre colegas jugando a Riftbound.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,10 +18,31 @@
 
 <header class="hero">
   <div class="hero__inner">
-    <p class="eyebrow">Archivo de la orden · Registro de combates</p>
+    <p class="eyebrow">JGT Enjoyers · Cuartel general</p>
     <h1 class="hero__title">RIFTBOUND<span class="hero__title-accent">JGT</span></h1>
-    <p class="hero__sub">Cada partida queda grabada en la runa. Aquí se lee la historia completa del grupo: quién domina, qué leyendas temen enfrentarse, y quién le debe una revancha a quién.</p>
+    <p class="hero__sub">Aquí queda todo apuntado para siempre, así que ya puedes ir preparando la excusa. Quién manda de verdad, quién solo presume, y quién lleva desde marzo debiendo la revancha.</p>
+  </div>
+</header>
 
+<nav class="tabs" id="tabs" aria-label="Secciones del archivo">
+  <button class="tabs__btn" data-target="section-inicio" aria-selected="true">Inicio</button>
+  <button class="tabs__btn" data-target="section-leaderboard" aria-selected="false">Invocadores</button>
+  <button class="tabs__btn" data-target="section-leyendas" aria-selected="false">Leyendas</button>
+  <button class="tabs__btn" data-target="section-matrix" aria-selected="false">Enfrentamientos</button>
+  <button class="tabs__btn" data-target="section-history" aria-selected="false">Crónica</button>
+  <button class="tabs__btn" data-target="section-comments" aria-selected="false">Comentarios</button>
+  <button class="tabs__btn" data-target="section-mandamientos" aria-selected="false">Mandamientos</button>
+</nav>
+
+<main>
+
+  <section class="section view view--active" id="section-inicio">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">El marcador de hoy</h2>
+        <p class="section__desc">El resumen que todo el mundo mira antes de empezar a discutir.</p>
+      </div>
+    </div>
     <div class="kpi-row" id="kpi-row">
       <div class="kpi kpi--loading">
         <span class="kpi__value">—</span>
@@ -40,30 +61,9 @@
         <span class="kpi__label">Formato BO1 / BO3</span>
       </div>
     </div>
-  </div>
-</header>
+  </section>
 
-<nav class="tabs" id="tabs" aria-label="Secciones del archivo">
-  <button class="tabs__btn" data-target="section-leaderboard" aria-selected="true">
-    <span class="tabs__num">I</span> Invocadores
-  </button>
-  <button class="tabs__btn" data-target="section-leyendas" aria-selected="false">
-    <span class="tabs__num">II</span> Leyendas
-  </button>
-  <button class="tabs__btn" data-target="section-matrix" aria-selected="false">
-    <span class="tabs__num">III</span> Enfrentamientos
-  </button>
-  <button class="tabs__btn" data-target="section-history" aria-selected="false">
-    <span class="tabs__num">IV</span> Crónica
-  </button>
-  <button class="tabs__btn" data-target="section-comments" aria-selected="false">
-    <span class="tabs__num">V</span> Comentarios
-  </button>
-</nav>
-
-<main>
-
-  <section class="section view view--active" id="section-leaderboard">
+  <section class="section view" id="section-leaderboard">
     <div class="section__head">
       <div>
         <h2 class="section__title">Tabla de invocadores</h2>
@@ -128,7 +128,7 @@
   <section class="section view" id="section-comments">
     <div class="section__head">
       <div>
-        <h2 class="section__title">Comentarios de la orden</h2>
+        <h2 class="section__title">Cotilleos del JGT</h2>
         <p class="section__desc">Notas y amenazas anotadas en cada enfrentamiento — lo que cada uno se guardó para la próxima vez.</p>
       </div>
     </div>
@@ -136,6 +136,23 @@
       <div id="comments" class="comments">
         <div class="loading-row">Releyendo anotaciones…</div>
       </div>
+    </div>
+  </section>
+
+  <section class="section view" id="section-mandamientos">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Los mandamientos del JGT</h2>
+        <p class="section__desc">Ley sagrada. No se discute, se acata.</p>
+      </div>
+    </div>
+    <div class="panel panel--commandments">
+      <ol class="commandments">
+        <li>Con el jueguito me acuesto, con el jueguito me levanto, la virgen María y el espíritu santo.</li>
+        <li>Maxel está loco.</li>
+        <li>Dani GT es mi pastor. Nada me falta.</li>
+        <li>El jueguito es una mafia.</li>
+      </ol>
     </div>
   </section>
 
