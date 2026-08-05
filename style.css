@@ -146,6 +146,19 @@ body {
   text-align: center;
 }
 
+.kpi--leader { padding-top: 14px; }
+
+.kpi__avatar {
+  width: 46px;
+  aspect-ratio: 4 / 5;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.15);
+  margin-bottom: 4px;
+}
+
 @media (max-width: 720px) {
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
 }
@@ -468,8 +481,8 @@ td.cell--empty {
   display: inline-block;
 }
 .swatch--low { background: var(--crimson); }
-.swatch--mid { background: #ce8144; }
-.swatch--high { background: var(--gold); }
+.swatch--mid { background: #788b6d; }
+.swatch--high { background: #2dc48c; }
 .swatch--empty { background: var(--ink-3); border: 1px solid var(--line); }
 
 /* ============================================================
@@ -513,6 +526,86 @@ td.cell--empty {
 
 @media (max-width: 620px) {
   .history__item { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* ============================================================
+   Comments filter
+   ============================================================ */
+.comments-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.comments-filter label {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.comments-filter select {
+  background: var(--ink-3);
+  color: var(--parchment);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+}
+.comments-filter select:hover { border-color: var(--gold-dim); }
+.comments-filter select:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 1px; }
+
+/* ============================================================
+   La Porra
+   ============================================================ */
+.panel--porra { padding: 0; overflow: hidden; }
+
+.porra-wrap {
+  overflow-x: auto;
+}
+
+table.table-simple {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+table.table-simple thead th {
+  background: var(--ink-3);
+  color: var(--gold-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+}
+
+table.table-simple tbody td {
+  padding: 11px 16px;
+  color: var(--parchment-dim);
+  border-bottom: 1px solid var(--line);
+}
+
+table.table-simple tbody td:first-child {
+  color: var(--parchment);
+  font-weight: 600;
+}
+
+table.table-simple tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.025);
+}
+
+table.table-simple tbody tr:hover {
+  background: rgba(201,162,39,0.06);
 }
 
 /* ============================================================
