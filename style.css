@@ -166,36 +166,32 @@ body {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
   background: none;
   border: none;
+  border-radius: 6px 6px 0 0;
   color: var(--muted);
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 18px 16px 15px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 18px 18px 15px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.tabs__btn:hover { color: var(--parchment); }
+.tabs__btn:hover {
+  color: var(--parchment);
+  background-color: rgba(201, 162, 39, 0.08);
+}
 
 .tabs__btn[aria-selected="true"] {
   color: var(--gold-soft);
   border-bottom-color: var(--gold);
 }
 
-.tabs__num {
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--gold-dim);
-}
-.tabs__btn[aria-selected="true"] .tabs__num { color: var(--gold); }
-
 @media (max-width: 620px) {
-  .tabs__btn { padding: 14px 12px 12px; font-size: 13px; }
+  .tabs__btn { padding: 14px 12px 12px; font-size: 14px; }
 }
 
 /* ============================================================
@@ -509,6 +505,50 @@ td.cell--empty {
 
 @media (max-width: 620px) {
   .history__item { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* ============================================================
+   Mandamientos
+   ============================================================ */
+.panel--commandments {
+  padding: 12px 8px;
+}
+
+.commandments {
+  list-style: none;
+  counter-reset: mandamiento;
+  margin: 0;
+  padding: 0;
+}
+
+.commandments li {
+  counter-increment: mandamiento;
+  position: relative;
+  padding: 22px 24px 22px 64px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--parchment);
+}
+.commandments li:last-child { border-bottom: none; }
+
+.commandments li::before {
+  content: counter(mandamiento);
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ============================================================
