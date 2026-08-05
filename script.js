@@ -10,7 +10,7 @@ const CONFIG = {
   //    con el enlace" -> "Lector". No hace falta "Publicar en la web".
   // 2. Copia el ID de la URL:
   //    https://docs.google.com/spreadsheets/d/ >>ESTE_TROZO<< /edit
-  SHEET_ID: "1fqDXw0rzwc9KM2VKaLbXHS1RPgV6NR_3FkCOVkbFxic",
+  SHEET_ID: "PON_AQUI_EL_ID_DE_TU_GOOGLE_SHEET",
 
   // Nombre exacto de la pestaña con las respuestas del formulario
   SHEET_TAB: "Respuestas_formulario",
