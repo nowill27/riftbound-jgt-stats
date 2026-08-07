@@ -473,6 +473,57 @@ function getAllLeyendas(matches) {
   return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
+function buildCommentCard(m) {
+  const fecha = m.marca ? formatFecha(m.marca) : "";
+  const rows = [];
+
+  if (m.notas && String(m.notas).trim()) {
+    rows.push(`
+      <div class="comment-card__row">
+        <span class="comment-card__tag">Nota</span>
+        <span>${escapeHtml(m.notas)}</span>
+      </div>
+    `);
+  }
+  if (m.amenazas && String(m.amenazas).trim()) {
+    rows.push(`
+      <div class="comment-card__row comment-card__row--amenaza">
+        <span class="comment-card__tag">Amenaza</span>
+        <span>${escapeHtml(m.amenazas)}</span>
+      </div>
+    `);
+  }
+  if (m.sideboardOtp && String(m.sideboardOtp).trim()) {
+    rows.push(`
+      <div class="comment-card__row comment-card__row--sideboard">
+        <span class="comment-card__tag comment-card__tag--sideboard">Sideboard OTP</span>
+        <span>${escapeHtml(m.sideboardOtp)}</span>
+      </div>
+    `);
+  }
+  if (m.sideboardOtd && String(m.sideboardOtd).trim()) {
+    rows.push(`
+      <div class="comment-card__row comment-card__row--sideboard">
+        <span class="comment-card__tag comment-card__tag--sideboard">Sideboard OTD</span>
+        <span>${escapeHtml(m.sideboardOtd)}</span>
+      </div>
+    `);
+  }
+
+  return `
+    <div class="comment-card">
+      <div class="comment-card__head">
+        <span class="comment-card__matchup">
+          <b>${escapeHtml(m.jugador)}</b> (${escapeHtml(m.leyendaJugador || "?")}) <span class="vs">vs</span>
+          <b>${escapeHtml(m.rival)}</b> (${escapeHtml(m.leyendaRival || "?")})
+        </span>
+        <span class="comment-card__date">${fecha}</span>
+      </div>
+      <div class="comment-card__body">${rows.join("")}</div>
+    </div>
+  `;
+}
+
 function renderComments(matches) {
   const el = document.getElementById("comments");
 
@@ -511,39 +562,7 @@ function renderComments(matches) {
       return;
     }
 
-    listEl.innerHTML = filtered.map(m => {
-      const fecha = m.marca ? formatFecha(m.marca) : "";
-      const rows = [];
-      if (m.notas && String(m.notas).trim()) {
-        rows.push(`
-          <div class="comment-card__row">
-            <span class="comment-card__tag">Nota</span>
-            <span>${escapeHtml(m.notas)}</span>
-          </div>
-        `);
-      }
-      if (m.amenazas && String(m.amenazas).trim()) {
-        rows.push(`
-          <div class="comment-card__row comment-card__row--amenaza">
-            <span class="comment-card__tag">Amenaza</span>
-            <span>${escapeHtml(m.amenazas)}</span>
-          </div>
-        `);
-      }
-
-      return `
-        <div class="comment-card">
-          <div class="comment-card__head">
-            <span class="comment-card__matchup">
-              <b>${m.jugador}</b> (${m.leyendaJugador || "?"}) <span class="vs">vs</span>
-              <b>${m.rival}</b> (${m.leyendaRival || "?"})
-            </span>
-            <span class="comment-card__date">${fecha}</span>
-          </div>
-          <div class="comment-card__body">${rows.join("")}</div>
-        </div>
-      `;
-    }).join("");
+    listEl.innerHTML = filtered.map(buildCommentCard).join("");
   }
 
   select.addEventListener("change", () => paintList(select.value));
@@ -596,8 +615,125 @@ function setupTabs() {
    6. Init
    ============================================================ */
 
+/* ============================================================
+   7. Gameplan — matchups de una leyenda + amenazas al hacer clic
+   ============================================================ */
+
+function renderGameplan(matrix, matches) {
+  const select = document.getElementById("gameplan-select");
+  const results = document.getElementById("gameplan-results");
+  if (!select || !results) return;
+
+  const leyendas = matrix.leyendas;
+  select.innerHTML = `<option value="">Elige una leyenda…</option>` +
+    leyendas.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("");
+
+  const amenazaCounts = computeAmenazaCountsByLeyenda(matches);
+
+  function paint(sel) {
+    if (!sel) {
+      results.innerHTML = `<div class="gameplan-empty">Elige tu leyenda arriba para ver cómo le va contra cada rival.</div>`;
+      return;
+    }
+
+    const pares = matrix.pares[sel] || {};
+    const rows = leyendas
+      .filter(l => l !== sel)
+      .map(l => {
+        const cell = pares[l];
+        const jugadas = cell ? cell.jugadas : 0;
+        const winrate = jugadas ? cell.victorias / jugadas : null;
+        return { leyenda: l, jugadas, winrate };
+      })
+      .sort((a, b) => {
+        if (a.winrate === null && b.winrate === null) return a.leyenda.localeCompare(b.leyenda, "es");
+        if (a.winrate === null) return 1;
+        if (b.winrate === null) return -1;
+        return b.winrate - a.winrate;
+      });
+
+    results.innerHTML = rows.map(r => {
+      const amenazas = amenazaCounts[r.leyenda] || 0;
+      const color = r.winrate === null ? null : colorForWinrate(r.winrate, VICTORY_COLOR);
+      return `
+        <div class="gameplan-row${r.winrate === null ? " gameplan-row--nodata" : ""}" data-leyenda="${escapeHtml(r.leyenda)}" tabindex="0" role="button">
+          <span class="gameplan-row__name">${escapeHtml(r.leyenda)}</span>
+          <span class="gameplan-row__track">
+            ${r.winrate !== null ? `<span class="gameplan-row__fill" style="width:${Math.round(r.winrate * 100)}%; background:${color}"></span>` : ""}
+          </span>
+          <span class="gameplan-row__pct">${r.winrate !== null ? `${fmtPct(r.winrate)} · ${r.jugadas}p` : "Sin datos"}</span>
+          <span class="gameplan-row__badge${amenazas ? "" : " gameplan-row__badge--empty"}">${amenazas ? `⚠ ${amenazas}` : "Sin amenazas"}</span>
+        </div>
+      `;
+    }).join("");
+
+    results.querySelectorAll(".gameplan-row").forEach(row => {
+      const open = () => openThreatModal(row.dataset.leyenda, matches);
+      row.addEventListener("click", open);
+      row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    });
+  }
+
+  select.addEventListener("change", () => paint(select.value));
+  paint("");
+}
+
+function computeAmenazaCountsByLeyenda(matches) {
+  const counts = {};
+  matches.forEach(m => {
+    if (!(m.amenazas && String(m.amenazas).trim())) return;
+    if (m.leyendaJugador) counts[m.leyendaJugador] = (counts[m.leyendaJugador] || 0) + 1;
+    if (m.leyendaRival) counts[m.leyendaRival] = (counts[m.leyendaRival] || 0) + 1;
+  });
+  return counts;
+}
+
+function openThreatModal(leyenda, matches) {
+  const backdrop = document.getElementById("threat-modal-backdrop");
+  const title = document.getElementById("threat-modal-title");
+  const body = document.getElementById("threat-modal-body");
+  if (!backdrop || !title || !body) return;
+
+  title.textContent = `Amenazas de ${leyenda}`;
+
+  // Igual que el filtro de Comentarios: cuenta tanto si la jugó
+  // el autor de la nota como si la jugó su rival en esa partida.
+  const entries = [...matches]
+    .reverse()
+    .filter(m => (m.leyendaJugador === leyenda || m.leyendaRival === leyenda) && m.amenazas && String(m.amenazas).trim());
+
+  if (!entries.length) {
+    body.innerHTML = `<div class="loading-row">Nadie ha anotado amenazas sobre ${escapeHtml(leyenda)} todavía.</div>`;
+  } else {
+    body.innerHTML = entries.map(buildCommentCard).join("");
+  }
+
+  backdrop.hidden = false;
+  document.getElementById("threat-modal-close")?.focus();
+}
+
+function closeThreatModal() {
+  const backdrop = document.getElementById("threat-modal-backdrop");
+  if (backdrop) backdrop.hidden = true;
+}
+
+function setupModal() {
+  const backdrop = document.getElementById("threat-modal-backdrop");
+  const closeBtn = document.getElementById("threat-modal-close");
+  if (!backdrop || !closeBtn) return;
+
+  closeBtn.addEventListener("click", closeThreatModal);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeThreatModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeThreatModal(); });
+}
+
+/* ============================================================
+   8. Init
+   ============================================================ */
+
 async function init() {
   setupTabs();
+  setupModal();
 
   try {
     const raw = await fetchSheetRows(CONFIG.SHEET_ID, CONFIG.SHEET_TAB);
@@ -613,6 +749,7 @@ async function init() {
     renderMatrix(matrix);
     renderHistory(matches);
     renderComments(matches);
+    renderGameplan(matrix, matches);
 
   } catch (err) {
     console.error(err);
