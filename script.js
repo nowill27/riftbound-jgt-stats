@@ -695,17 +695,7 @@ function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
   const el = document.getElementById("gameplan-detail");
   if (!el) return;
 
-  // Todo lo que involucra a la leyenda enemiga, sea cual sea el otro lado.
-  const related = [...matches].reverse().filter(m => m.leyendaJugador === enemyLeyenda || m.leyendaRival === enemyLeyenda);
-
-  // De eso, solo los enfrentamientos directos contra tu leyenda seleccionada.
-  const specific = related.filter(m =>
-    (m.leyendaJugador === myLeyenda && m.leyendaRival === enemyLeyenda) ||
-    (m.leyendaJugador === enemyLeyenda && m.leyendaRival === myLeyenda)
-  );
-  const specificSet = new Set(specific);
-  // El resto: la leyenda enemiga contra cualquier otra leyenda (menos relevante aquí).
-  const general = related.filter(m => !specificSet.has(m));
+  const reversed = [...matches].reverse();
 
   function buildEntry(m, field) {
     const fecha = m.marca ? formatFecha(m.marca) : "";
@@ -720,20 +710,59 @@ function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
     `;
   }
 
-  function buildColumn(field) {
-    const specificEntries = specific.filter(m => m[field] && String(m[field]).trim());
-    const generalEntries = general.filter(m => m[field] && String(m[field]).trim());
+  // Una amenaza la escribe "Jugador" sobre "Rival" — describe al rival,
+  // no a quien la escribe. Por eso aquí sí importa la dirección:
+  function tiersForAmenazas() {
+    const has = m => m.amenazas && String(m.amenazas).trim();
+    return [
+      {
+        // Lo más útil: lo que anotaste jugando tu leyenda contra esta rival.
+        title: `Jugando ${myLeyenda} contra ${enemyLeyenda}`,
+        entries: reversed.filter(m => has(m) && m.leyendaJugador === myLeyenda && m.leyendaRival === enemyLeyenda),
+        empty: "Nada anotado en este matchup todavía.",
+      },
+      {
+        // Distinto: esto describe tu leyenda, no a la rival — lo separamos.
+        title: `Anotado sobre ${myLeyenda} (jugando ${enemyLeyenda})`,
+        entries: reversed.filter(m => has(m) && m.leyendaJugador === enemyLeyenda && m.leyendaRival === myLeyenda),
+        empty: "Nada anotado todavía.",
+        secondary: true,
+      },
+      {
+        // Menos relevante: esta leyenda rival contra cualquier otra.
+        title: `${enemyLeyenda} contra otras leyendas`,
+        entries: reversed.filter(m => has(m) && m.leyendaRival === enemyLeyenda && m.leyendaJugador !== myLeyenda),
+        empty: "Nada más anotado.",
+        secondary: true,
+      },
+    ];
+  }
 
-    return `
-      <div class="gameplan-detail__tier">
-        <h5 class="gameplan-detail__tier-title">Contra ${escapeHtml(myLeyenda)}</h5>
-        ${specificEntries.length ? specificEntries.map(m => buildEntry(m, field)).join("") : `<div class="gameplan-detail__empty">Nada anotado en este matchup todavía.</div>`}
+  // Las notas son más libres (no siempre "sobre el rival"), así que
+  // aquí mantenemos el criterio anterior: el enfrentamiento directo
+  // primero, y el resto de menciones a esta leyenda después.
+  function tiersForNotas() {
+    const has = m => m.notas && String(m.notas).trim();
+    const related = reversed.filter(m => has(m) && (m.leyendaJugador === enemyLeyenda || m.leyendaRival === enemyLeyenda));
+    const specific = related.filter(m =>
+      (m.leyendaJugador === myLeyenda && m.leyendaRival === enemyLeyenda) ||
+      (m.leyendaJugador === enemyLeyenda && m.leyendaRival === myLeyenda)
+    );
+    const specificSet = new Set(specific);
+    const general = related.filter(m => !specificSet.has(m));
+    return [
+      { title: `Contra ${myLeyenda}`, entries: specific, empty: "Nada anotado en este matchup todavía." },
+      { title: `Contra otras leyendas`, entries: general, empty: "Nada más anotado.", secondary: true },
+    ];
+  }
+
+  function buildColumn(field, tiers) {
+    return tiers.map(t => `
+      <div class="gameplan-detail__tier${t.secondary ? " gameplan-detail__tier--secondary" : ""}">
+        <h5 class="gameplan-detail__tier-title">${escapeHtml(t.title)}</h5>
+        ${t.entries.length ? t.entries.map(m => buildEntry(m, field)).join("") : `<div class="gameplan-detail__empty">${t.empty}</div>`}
       </div>
-      <div class="gameplan-detail__tier gameplan-detail__tier--secondary">
-        <h5 class="gameplan-detail__tier-title">Contra otras leyendas</h5>
-        ${generalEntries.length ? generalEntries.map(m => buildEntry(m, field)).join("") : `<div class="gameplan-detail__empty">Nada más anotado.</div>`}
-      </div>
-    `;
+    `).join("");
   }
 
   el.innerHTML = `
@@ -741,11 +770,11 @@ function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
     <div class="gameplan-detail__cols">
       <div>
         <h4 class="gameplan-detail__col-title gameplan-detail__col-title--amenazas">Amenazas</h4>
-        ${buildColumn("amenazas")}
+        ${buildColumn("amenazas", tiersForAmenazas())}
       </div>
       <div>
         <h4 class="gameplan-detail__col-title gameplan-detail__col-title--notas">Notas</h4>
-        ${buildColumn("notas")}
+        ${buildColumn("notas", tiersForNotas())}
       </div>
     </div>
   `;
