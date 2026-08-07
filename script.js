@@ -631,6 +631,9 @@ function renderGameplan(matrix, matches) {
   const amenazaCounts = computeAmenazaCountsByLeyenda(matches);
 
   function paint(sel) {
+    const detail = document.getElementById("gameplan-detail");
+    if (detail) detail.hidden = true;
+
     if (!sel) {
       results.innerHTML = `<div class="gameplan-empty">Elige tu leyenda arriba para ver cómo le va contra cada rival.</div>`;
       return;
@@ -668,7 +671,7 @@ function renderGameplan(matrix, matches) {
     }).join("");
 
     results.querySelectorAll(".gameplan-row").forEach(row => {
-      const open = () => openThreatModal(row.dataset.leyenda, matches);
+      const open = () => renderGameplanDetail(sel, row.dataset.leyenda, matches);
       row.addEventListener("click", open);
       row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
     });
@@ -688,43 +691,65 @@ function computeAmenazaCountsByLeyenda(matches) {
   return counts;
 }
 
-function openThreatModal(leyenda, matches) {
-  const backdrop = document.getElementById("threat-modal-backdrop");
-  const title = document.getElementById("threat-modal-title");
-  const body = document.getElementById("threat-modal-body");
-  if (!backdrop || !title || !body) return;
+function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
+  const el = document.getElementById("gameplan-detail");
+  if (!el) return;
 
-  title.textContent = `Amenazas de ${leyenda}`;
+  // Todo lo que involucra a la leyenda enemiga, sea cual sea el otro lado.
+  const related = [...matches].reverse().filter(m => m.leyendaJugador === enemyLeyenda || m.leyendaRival === enemyLeyenda);
 
-  // Igual que el filtro de Comentarios: cuenta tanto si la jugó
-  // el autor de la nota como si la jugó su rival en esa partida.
-  const entries = [...matches]
-    .reverse()
-    .filter(m => (m.leyendaJugador === leyenda || m.leyendaRival === leyenda) && m.amenazas && String(m.amenazas).trim());
+  // De eso, solo los enfrentamientos directos contra tu leyenda seleccionada.
+  const specific = related.filter(m =>
+    (m.leyendaJugador === myLeyenda && m.leyendaRival === enemyLeyenda) ||
+    (m.leyendaJugador === enemyLeyenda && m.leyendaRival === myLeyenda)
+  );
+  const specificSet = new Set(specific);
+  // El resto: la leyenda enemiga contra cualquier otra leyenda (menos relevante aquí).
+  const general = related.filter(m => !specificSet.has(m));
 
-  if (!entries.length) {
-    body.innerHTML = `<div class="loading-row">Nadie ha anotado amenazas sobre ${escapeHtml(leyenda)} todavía.</div>`;
-  } else {
-    body.innerHTML = entries.map(buildCommentCard).join("");
+  function buildEntry(m, field) {
+    const fecha = m.marca ? formatFecha(m.marca) : "";
+    return `
+      <div class="gameplan-detail__entry">
+        <span class="gameplan-detail__entry-meta">
+          <b>${escapeHtml(m.jugador)}</b> (${escapeHtml(m.leyendaJugador || "?")}) vs
+          <b>${escapeHtml(m.rival)}</b> (${escapeHtml(m.leyendaRival || "?")}) · ${fecha}
+        </span>
+        <p class="gameplan-detail__entry-text">${escapeHtml(m[field])}</p>
+      </div>
+    `;
   }
 
-  backdrop.hidden = false;
-  document.getElementById("threat-modal-close")?.focus();
-}
+  function buildColumn(field) {
+    const specificEntries = specific.filter(m => m[field] && String(m[field]).trim());
+    const generalEntries = general.filter(m => m[field] && String(m[field]).trim());
 
-function closeThreatModal() {
-  const backdrop = document.getElementById("threat-modal-backdrop");
-  if (backdrop) backdrop.hidden = true;
-}
+    return `
+      <div class="gameplan-detail__tier">
+        <h5 class="gameplan-detail__tier-title">Contra ${escapeHtml(myLeyenda)}</h5>
+        ${specificEntries.length ? specificEntries.map(m => buildEntry(m, field)).join("") : `<div class="gameplan-detail__empty">Nada anotado en este matchup todavía.</div>`}
+      </div>
+      <div class="gameplan-detail__tier gameplan-detail__tier--secondary">
+        <h5 class="gameplan-detail__tier-title">Contra otras leyendas</h5>
+        ${generalEntries.length ? generalEntries.map(m => buildEntry(m, field)).join("") : `<div class="gameplan-detail__empty">Nada más anotado.</div>`}
+      </div>
+    `;
+  }
 
-function setupModal() {
-  const backdrop = document.getElementById("threat-modal-backdrop");
-  const closeBtn = document.getElementById("threat-modal-close");
-  if (!backdrop || !closeBtn) return;
-
-  closeBtn.addEventListener("click", closeThreatModal);
-  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeThreatModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeThreatModal(); });
+  el.innerHTML = `
+    <h3 class="gameplan-detail__title">Sobre ${escapeHtml(enemyLeyenda)}</h3>
+    <div class="gameplan-detail__cols">
+      <div>
+        <h4 class="gameplan-detail__col-title gameplan-detail__col-title--amenazas">Amenazas</h4>
+        ${buildColumn("amenazas")}
+      </div>
+      <div>
+        <h4 class="gameplan-detail__col-title gameplan-detail__col-title--notas">Notas</h4>
+        ${buildColumn("notas")}
+      </div>
+    </div>
+  `;
+  el.hidden = false;
 }
 
 /* ============================================================
@@ -733,7 +758,6 @@ function setupModal() {
 
 async function init() {
   setupTabs();
-  setupModal();
 
   try {
     const raw = await fetchSheetRows(CONFIG.SHEET_ID, CONFIG.SHEET_TAB);
