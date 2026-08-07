@@ -856,63 +856,86 @@ table.table-simple tbody tr:hover {
 }
 
 /* ============================================================
-   Modal (amenazas por leyenda)
+   Gameplan detail (amenazas + notas, bajo la tabla)
    ============================================================ */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(8,9,14,0.72);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  padding: 20px;
+.gameplan-detail {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  animation: fade-in 0.2s ease;
 }
-.modal-backdrop[hidden] { display: none; }
+.gameplan-detail[hidden] { display: none; }
 
-.modal {
-  background: var(--ink-2);
-  border: 1px solid var(--gold-dim);
-  border-radius: var(--radius);
-  width: 100%;
-  max-width: 560px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px -20px rgba(0,0,0,0.8);
-}
-
-.modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--line);
-  flex: none;
-}
-
-.modal__title {
+.gameplan-detail__title {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 19px;
   color: var(--gold-soft);
-  margin: 0;
+  margin: 0 0 16px;
 }
 
-.modal__close {
-  background: none;
-  border: none;
+.gameplan-detail__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+@media (max-width: 620px) {
+  .gameplan-detail__cols { grid-template-columns: 1fr; gap: 20px; }
+}
+
+.gameplan-detail__col-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.gameplan-detail__col-title--amenazas { color: var(--crimson-soft); }
+.gameplan-detail__col-title--notas { color: var(--teal); }
+
+.gameplan-detail__tier-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
   color: var(--muted);
-  font-size: 16px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 6px;
+  margin: 0 0 6px;
 }
-.modal__close:hover { color: var(--parchment); }
-.modal__close:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 1px; }
 
-.modal__body {
-  overflow-y: auto;
+.gameplan-detail__tier--secondary {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  opacity: 0.75;
+}
+.gameplan-detail__tier--secondary .gameplan-detail__entry-text { font-size: 12px; }
+
+.gameplan-detail__entry {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.gameplan-detail__entry:last-child { border-bottom: none; }
+
+.gameplan-detail__entry-meta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.gameplan-detail__entry-meta b { color: var(--parchment-dim); }
+
+.gameplan-detail__entry-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--parchment-dim);
+  line-height: 1.5;
+}
+
+.gameplan-detail__empty {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
   padding: 4px 0;
 }
 
