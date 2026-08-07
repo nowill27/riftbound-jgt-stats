@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -37,6 +37,7 @@
   <button class="tabs__btn" data-target="section-matrix" aria-selected="false">Enfrentamientos</button>
   <button class="tabs__btn" data-target="section-history" aria-selected="false">Crónica</button>
   <button class="tabs__btn" data-target="section-comments" aria-selected="false">Comentarios</button>
+  <button class="tabs__btn" data-target="section-gameplan" aria-selected="false">Gameplan</button>
   <button class="tabs__btn" data-target="section-porra" aria-selected="false">La Porra</button>
   <button class="tabs__btn" data-target="section-mandamientos" aria-selected="false">Mandamientos</button>
 </nav>
@@ -148,6 +149,26 @@
     </div>
   </section>
 
+  <section class="section view" id="section-gameplan">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Gameplan</h2>
+        <p class="section__desc">Elige tu leyenda y mira cómo le va contra cada rival. Haz clic en cualquiera para ver las amenazas que se han ido anotando sobre ella.</p>
+      </div>
+    </div>
+    <div class="panel panel--gameplan">
+      <div class="gameplan-selector">
+        <label for="gameplan-select">Tu leyenda</label>
+        <select id="gameplan-select">
+          <option value="">Elige una leyenda…</option>
+        </select>
+      </div>
+      <div id="gameplan-results" class="gameplan-results">
+        <div class="gameplan-empty">Elige tu leyenda arriba para ver cómo le va contra cada rival.</div>
+      </div>
+    </div>
+  </section>
+
   <section class="section view" id="section-porra">
     <div class="section__head">
       <div>
@@ -224,6 +245,16 @@
   <p>Datos sincronizados desde el archivo de Google Sheets del grupo · Actualizado en cada carga de página</p>
 </footer>
 
-<script src="script.js"></script>
+<div class="modal-backdrop" id="threat-modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="threat-modal-title">
+    <div class="modal__header">
+      <h3 class="modal__title" id="threat-modal-title">Amenazas</h3>
+      <button class="modal__close" id="threat-modal-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal__body" id="threat-modal-body"></div>
+  </div>
+</div>
+
+<script src="script.js?v=4"></script>
 </body>
 </html>
