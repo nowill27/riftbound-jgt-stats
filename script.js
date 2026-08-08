@@ -23,7 +23,7 @@ const CONFIG = {
   MIN_MATCHES_MATRIX: 2,
 
   // Cuántas partidas recientes mostrar en la Crónica
-  HISTORY_LIMIT: 12,
+  HISTORY_LIMIT: 100,
 
   // Carpeta donde subirás las fotos de cada jugador (la que ya
   // existe en tu repo: assets/imgs). Nombre de archivo esperado:
