@@ -619,6 +619,11 @@ td.cell--empty {
 /* ============================================================
    History
    ============================================================ */
+.history {
+  max-height: 680px;
+  overflow-y: auto;
+}
+
 .history__item {
   display: grid;
   grid-template-columns: auto 1fr auto;
