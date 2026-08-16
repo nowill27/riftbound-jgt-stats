@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 
@@ -39,9 +39,13 @@
   <button class="tabs__btn" data-target="section-history" aria-selected="false">Crónica</button>
   <button class="tabs__btn" data-target="section-comments" aria-selected="false">Comentarios</button>
   <button class="tabs__btn" data-target="section-gameplan" aria-selected="false">Gameplan</button>
-  <button class="tabs__btn" data-target="section-porra" aria-selected="false">La Porra</button>
-  <button class="tabs__btn" data-target="section-mandamientos" aria-selected="false">Mandamientos</button>
+  <button class="tabs__btn" id="tabs-more-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-selected="false">Otros <span class="tabs__more-caret">▾</span></button>
 </nav>
+
+<div class="tabs__more-menu" id="tabs-more-menu" role="menu" hidden>
+  <button class="tabs__more-item" data-target="section-porra" role="menuitem">La Porra</button>
+  <button class="tabs__more-item" data-target="section-mandamientos" role="menuitem">Mandamientos</button>
+</div>
 
 <main>
 
@@ -275,6 +279,6 @@
   <p>Datos sincronizados desde el archivo de Google Sheets del grupo · Actualizado en cada carga de página</p>
 </footer>
 
-<script src="script.js?v=13"></script>
+<script src="script.js?v=14"></script>
 </body>
 </html>
