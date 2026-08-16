@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
@@ -34,6 +34,7 @@
   <button class="tabs__btn" data-target="section-inicio" aria-selected="true">Inicio</button>
   <button class="tabs__btn" data-target="section-leaderboard" aria-selected="false">Invocadores</button>
   <button class="tabs__btn" data-target="section-leyendas" aria-selected="false">Leyendas</button>
+  <button class="tabs__btn" data-target="section-battlefields" aria-selected="false">Battlefields</button>
   <button class="tabs__btn" data-target="section-matrix" aria-selected="false">Enfrentamientos</button>
   <button class="tabs__btn" data-target="section-history" aria-selected="false">Crónica</button>
   <button class="tabs__btn" data-target="section-comments" aria-selected="false">Comentarios</button>
@@ -97,6 +98,33 @@
     <div class="panel">
       <div id="leyendas-chart" class="leyendas-chart">
         <div class="loading-row">Calculando el poder rúnico…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section view" id="section-battlefields">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Battlefields</h2>
+        <p class="section__desc">Los campos de batalla más elegidos, en general y filtrando por leyenda.</p>
+      </div>
+    </div>
+    <div class="panel panel--bf">
+      <h3 class="bf-subtitle">Ranking general</h3>
+      <div id="bf-ranking" class="bf-ranking">
+        <div class="loading-row">Cargando ranking…</div>
+      </div>
+
+      <div class="bf-divider"></div>
+
+      <div class="bf-legend-header">
+        <h3 class="bf-subtitle bf-subtitle--inline">Por leyenda</h3>
+        <select id="bf-legend-select">
+          <option value="">Elige una leyenda…</option>
+        </select>
+      </div>
+      <div id="bf-legend-ranking" class="bf-ranking">
+        <div class="gameplan-empty">Elige una leyenda para ver sus battlefields más jugados.</div>
       </div>
     </div>
   </section>
@@ -247,6 +275,6 @@
   <p>Datos sincronizados desde el archivo de Google Sheets del grupo · Actualizado en cada carga de página</p>
 </footer>
 
-<script src="script.js?v=10"></script>
+<script src="script.js?v=11"></script>
 </body>
 </html>
