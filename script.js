@@ -591,18 +591,56 @@ function formatFecha(v) {
    ============================================================ */
 
 function setupTabs() {
-  const buttons = Array.from(document.querySelectorAll(".tabs__btn"));
+  const buttons = Array.from(document.querySelectorAll(".tabs__btn[data-target]"));
+  const moreItems = Array.from(document.querySelectorAll(".tabs__more-item"));
+  const allTargetButtons = [...buttons, ...moreItems];
   const views = Array.from(document.querySelectorAll(".view"));
+
+  const moreTrigger = document.getElementById("tabs-more-trigger");
+  const moreMenu = document.getElementById("tabs-more-menu");
+  const moreTargets = moreItems.map(b => b.dataset.target);
+
+  function closeMore() {
+    if (!moreMenu || moreMenu.hidden) return;
+    moreMenu.hidden = true;
+    if (moreTrigger) moreTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  function openMore() {
+    if (!moreMenu || !moreTrigger) return;
+    // Posicionamos con "fixed" calculado en JS en vez de un simple
+    // position:absolute, porque la barra de pestañas tiene scroll
+    // horizontal (overflow-x) y eso recortaría un menú anidado dentro.
+    const rect = moreTrigger.getBoundingClientRect();
+    moreMenu.style.left = `${Math.round(rect.left)}px`;
+    moreMenu.style.top = `${Math.round(rect.bottom + 6)}px`;
+    moreMenu.hidden = false;
+    moreTrigger.setAttribute("aria-expanded", "true");
+  }
 
   function activate(targetId, updateHash) {
     views.forEach(v => v.classList.toggle("view--active", v.id === targetId));
-    buttons.forEach(b => b.setAttribute("aria-selected", String(b.dataset.target === targetId)));
+    allTargetButtons.forEach(b => b.setAttribute("aria-selected", String(b.dataset.target === targetId)));
+    if (moreTrigger) moreTrigger.setAttribute("aria-selected", String(moreTargets.includes(targetId)));
     if (updateHash) history.replaceState(null, "", `#${targetId}`);
+    closeMore();
   }
 
-  buttons.forEach(btn => {
+  allTargetButtons.forEach(btn => {
     btn.addEventListener("click", () => activate(btn.dataset.target, true));
   });
+
+  if (moreTrigger && moreMenu) {
+    moreTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (moreMenu.hidden) openMore(); else closeMore();
+    });
+    document.addEventListener("click", (e) => {
+      if (!moreMenu.hidden && !moreMenu.contains(e.target) && e.target !== moreTrigger) closeMore();
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMore(); });
+    window.addEventListener("resize", closeMore);
+  }
 
   const fromHash = window.location.hash.replace("#", "");
   const validIds = views.map(v => v.id);
