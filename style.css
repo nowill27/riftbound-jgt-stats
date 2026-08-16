@@ -861,6 +861,100 @@ table.table-simple tbody tr:hover {
 }
 
 /* ============================================================
+   Battlefields
+   ============================================================ */
+.panel--bf {
+  padding: 8px 0;
+}
+
+.bf-subtitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--parchment);
+  margin: 4px 24px 8px;
+  padding-top: 12px;
+}
+.bf-subtitle--inline { margin: 0; padding-top: 0; }
+
+.bf-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 24px 20px;
+}
+
+.bf-row {
+  display: grid;
+  grid-template-columns: 170px 1fr 80px;
+  align-items: center;
+  gap: 14px;
+}
+
+.bf-row__name {
+  font-size: 13px;
+  color: var(--parchment-dim);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bf-row__track {
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bf-row__fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-soft));
+}
+
+.bf-row__stats {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.bf-row__stats b { color: var(--gold-soft); }
+
+.bf-divider {
+  border-top: 1px solid var(--line);
+  margin: 4px 24px;
+}
+
+.bf-legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 24px 12px;
+}
+
+#bf-legend-select {
+  background: var(--ink-3);
+  color: var(--parchment);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 180px;
+}
+#bf-legend-select:hover { border-color: var(--gold-dim); }
+#bf-legend-select:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 1px; }
+
+@media (max-width: 620px) {
+  .bf-row { grid-template-columns: 100px 1fr 60px; }
+  .bf-row__name { font-size: 12px; }
+}
+
+/* ============================================================
    Gameplan detail (amenazas + notas, bajo la tabla)
    ============================================================ */
 .gameplan-detail {
