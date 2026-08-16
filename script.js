@@ -785,6 +785,86 @@ function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
    8. Init
    ============================================================ */
 
+/* ============================================================
+   8. Battlefields
+   ============================================================ */
+
+function computeBattlefieldStats(rounds) {
+  const overallCounts = {};
+  const byLeyenda = {}; // leyenda -> { battlefield: count }
+
+  function addOverall(bf) {
+    if (!bf) return;
+    overallCounts[bf] = (overallCounts[bf] || 0) + 1;
+  }
+  function addByLeyenda(leyenda, bf) {
+    if (!leyenda || !bf) return;
+    byLeyenda[leyenda] = byLeyenda[leyenda] || {};
+    byLeyenda[leyenda][bf] = (byLeyenda[leyenda][bf] || 0) + 1;
+  }
+
+  // Cada ronda tiene su propio battlefield por lado — se cuenta el
+  // del jugador y el del rival como dos elecciones independientes.
+  rounds.forEach(r => {
+    addOverall(r.battlefieldJugador);
+    addOverall(r.battlefieldRival);
+    addByLeyenda(r.leyendaJugador, r.battlefieldJugador);
+    addByLeyenda(r.leyendaRival, r.battlefieldRival);
+  });
+
+  const toSortedList = counts => Object.entries(counts)
+    .map(([battlefield, count]) => ({ battlefield, count }))
+    .sort((a, b) => b.count - a.count);
+
+  const byLeyendaSorted = {};
+  Object.entries(byLeyenda).forEach(([leyenda, counts]) => {
+    byLeyendaSorted[leyenda] = toSortedList(counts);
+  });
+
+  return { overall: toSortedList(overallCounts), byLeyenda: byLeyendaSorted };
+}
+
+function renderBattlefieldBars(container, list) {
+  if (!list.length) {
+    container.innerHTML = `<div class="gameplan-empty">Sin datos todavía.</div>`;
+    return;
+  }
+  const max = list[0].count;
+  container.innerHTML = list.map(item => `
+    <div class="bf-row">
+      <span class="bf-row__name">${escapeHtml(item.battlefield)}</span>
+      <span class="bf-row__track"><span class="bf-row__fill" style="width:${Math.round(item.count / max * 100)}%"></span></span>
+      <span class="bf-row__stats"><b>${item.count}</b> vez${item.count === 1 ? "" : "es"}</span>
+    </div>
+  `).join("");
+}
+
+function renderBattlefields(stats) {
+  const overallEl = document.getElementById("bf-ranking");
+  const legendSelect = document.getElementById("bf-legend-select");
+  const legendRankingEl = document.getElementById("bf-legend-ranking");
+  if (!overallEl || !legendSelect || !legendRankingEl) return;
+
+  renderBattlefieldBars(overallEl, stats.overall);
+
+  const leyendasConDatos = Object.keys(stats.byLeyenda).sort((a, b) => a.localeCompare(b, "es"));
+  legendSelect.innerHTML = `<option value="">Elige una leyenda…</option>` +
+    leyendasConDatos.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("");
+
+  legendSelect.addEventListener("change", () => {
+    const sel = legendSelect.value;
+    if (!sel) {
+      legendRankingEl.innerHTML = `<div class="gameplan-empty">Elige una leyenda para ver sus battlefields más jugados.</div>`;
+      return;
+    }
+    renderBattlefieldBars(legendRankingEl, stats.byLeyenda[sel] || []);
+  });
+}
+
+/* ============================================================
+   9. Init
+   ============================================================ */
+
 async function init() {
   setupTabs();
 
@@ -795,10 +875,12 @@ async function init() {
     const leaderboard = computeLeaderboard(matches);
     const leyendaWinrate = computeLeyendaWinrate(rounds);
     const matrix = computeMatchupMatrix(rounds);
+    const bfStats = computeBattlefieldStats(rounds);
 
     renderKPIs({ matches, leaderboard, leyendaWinrate });
     renderLeaderboard(leaderboard);
     renderLeyendas(leyendaWinrate);
+    renderBattlefields(bfStats);
     renderMatrix(matrix);
     renderHistory(matches);
     renderComments(matches);
