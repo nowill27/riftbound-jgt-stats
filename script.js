@@ -834,7 +834,7 @@ function renderBattlefieldBars(container, list) {
     <div class="bf-row">
       <span class="bf-row__name">${escapeHtml(item.battlefield)}</span>
       <span class="bf-row__track"><span class="bf-row__fill" style="width:${Math.round(item.count / max * 100)}%"></span></span>
-      <span class="bf-row__stats"><b>${item.count}</b> vez${item.count === 1 ? "" : "es"}</span>
+      <span class="bf-row__stats"><b>${item.count}</b> ${item.count === 1 ? "vez" : "veces"}</span>
     </div>
   `).join("");
 }
