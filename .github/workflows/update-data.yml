@@ -40,7 +40,7 @@ jobs:
         env:
           SHEET_ID: "1fqDXw0rzwc9KM2VKaLbXHS1RPgV6NR_3FkCOVkbFxic"
           SHEET_TAB: "Respuestas_formulario"
-        run: node scripts/fetch-sheet.js
+        run: node .github/scripts/fetch-sheet.js
 
       - name: Commitear data.json si ha cambiado
         run: |
