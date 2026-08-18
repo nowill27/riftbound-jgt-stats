@@ -417,21 +417,6 @@ main {
   margin-bottom: 24px;
 }
 
-.section__num {
-  font-family: var(--font-display);
-  font-size: 14px;
-  color: var(--gold);
-  border: 1px solid var(--gold-dim);
-  width: 32px;
-  height: 32px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  margin-top: 2px;
-}
-
 .section__title {
   font-family: var(--font-display);
   font-size: 24px;
