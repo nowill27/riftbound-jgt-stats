@@ -1,19 +1,20 @@
 /* ============================================================
    RIFTBOUND JGT — script.js
-   Trae los datos desde Google Sheets (Google Visualization API,
-   "gviz") y calcula en el navegador: leaderboard, winrate por
-   leyenda, matriz de matchups y crónica de partidas recientes.
+   Ya no se conecta a Google Sheets directamente desde el navegador
+   (eso rompía con VPNs/redes que Google marca como sospechosas).
+   En su lugar, lee data.json, un archivo generado periódicamente
+   por una GitHub Action (.github/workflows/update-data.yml) que
+   descarga la hoja desde el servidor de GitHub. Calcula en el
+   navegador: leaderboard, winrate por leyenda, matriz de matchups
+   y crónica de partidas recientes.
    ============================================================ */
 
 const CONFIG = {
-  // 1. Ve a tu Google Sheet -> "Compartir" -> "Cualquier usuario
-  //    con el enlace" -> "Lector". No hace falta "Publicar en la web".
-  // 2. Copia el ID de la URL:
-  //    https://docs.google.com/spreadsheets/d/ >>ESTE_TROZO<< /edit
-  SHEET_ID: "1fqDXw0rzwc9KM2VKaLbXHS1RPgV6NR_3FkCOVkbFxic",
-
-  // Nombre exacto de la pestaña con las respuestas del formulario
-  SHEET_TAB: "Respuestas_formulario",
+  // Archivo generado por la GitHub Action. Si algún día quieres
+  // cambiar de hoja de Google, el SHEET_ID a editar está en
+  // .github/workflows/update-data.yml, no aquí — este script.js
+  // ya no habla con Google en ningún momento.
+  DATA_FILE: "data.json",
 
   // Jugadores a excluir de todas las estadísticas (partidas de prueba, etc.)
   EXCLUDE_PLAYERS: ["Invitado"],
@@ -47,32 +48,18 @@ function slugifyName(name) {
 }
 
 /* ============================================================
-   1. Fetch + parseo de Google Sheets (gviz)
+   1. Lectura de data.json (generado por la GitHub Action)
    ============================================================ */
 
-async function fetchSheetRows(sheetId, sheetTab) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetTab)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`No se pudo leer la hoja "${sheetTab}" (HTTP ${res.status}). Revisa el SHEET_ID y los permisos de "cualquiera con el enlace".`);
-  const text = await res.text();
-
-  // La respuesta viene envuelta en: google.visualization.Query.setResponse({...});
-  const jsonStart = text.indexOf("{");
-  const jsonEnd = text.lastIndexOf("}");
-  const data = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
-
-  const labels = data.table.cols.map(c => (c.label || "").trim());
-
-  const rows = data.table.rows.map(r => {
-    const obj = {};
-    labels.forEach((label, i) => {
-      const cell = r.c[i];
-      obj[label] = cell ? (cell.f !== undefined && cell.f !== null ? cell.f : cell.v) : null;
-    });
-    return obj;
-  });
-
-  return rows.filter(row => Object.values(row).some(v => v !== null && v !== ""));
+async function fetchLocalData() {
+  // Cache-bust con la hora actual: así, si alguien deja la pestaña
+  // abierta un rato, un F5 siempre trae la versión más reciente de
+  // data.json en vez de una copia cacheada por el navegador.
+  const res = await fetch(`${CONFIG.DATA_FILE}?_=${Date.now()}`);
+  if (!res.ok) throw new Error(`No se pudo leer ${CONFIG.DATA_FILE} (HTTP ${res.status}). ¿Se ha ejecutado ya la GitHub Action "Actualizar datos de Riftbound" al menos una vez?`);
+  const payload = await res.json();
+  if (!Array.isArray(payload.rows)) throw new Error(`${CONFIG.DATA_FILE} tiene un formato inesperado.`);
+  return payload;
 }
 
 /* ============================================================
@@ -907,8 +894,8 @@ async function init() {
   setupTabs();
 
   try {
-    const raw = await fetchSheetRows(CONFIG.SHEET_ID, CONFIG.SHEET_TAB);
-    const { rounds, matches } = buildRounds(raw);
+    const payload = await fetchLocalData();
+    const { rounds, matches } = buildRounds(payload.rows);
 
     const leaderboard = computeLeaderboard(matches);
     const leyendaWinrate = computeLeyendaWinrate(rounds);
@@ -923,13 +910,22 @@ async function init() {
     renderHistory(matches);
     renderComments(matches);
     renderGameplan(matrix, matches);
+    renderFooterTimestamp(payload.generatedAt);
 
   } catch (err) {
     console.error(err);
     document.querySelectorAll(".loading-row").forEach(el => {
-      el.textContent = "No se pudo cargar el archivo. Revisa CONFIG.SHEET_ID y los permisos de la hoja en script.js.";
+      el.textContent = "No se pudieron cargar los datos. Comprueba en la pestaña 'Actions' del repo que la tarea 'Actualizar datos de Riftbound' se haya ejecutado correctamente.";
     });
   }
+}
+
+function renderFooterTimestamp(generatedAt) {
+  const el = document.getElementById("footer-updated");
+  if (!el || !generatedAt) return;
+  const d = new Date(generatedAt);
+  const texto = d.toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  el.textContent = `· Última actualización de los datos: ${texto}`;
 }
 
 init();
