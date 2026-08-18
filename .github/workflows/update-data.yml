@@ -2,10 +2,10 @@ name: Actualizar datos de Riftbound
 
 on:
   schedule:
-    # Cada 30 minutos. GitHub puede retrasar la ejecución en horas de
+    # Cada 15 minutos. GitHub puede retrasar la ejecución en horas de
     # mucha carga — no es un cron exacto al segundo, pero de sobra
     # para este uso. Formato: minuto hora día mes día-semana.
-    - cron: "*/30 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}
     # Permite lanzarlo a mano en cualquier momento desde
     # GitHub → pestaña "Actions" → "Actualizar datos de Riftbound" → "Run workflow"
@@ -16,6 +16,13 @@ permissions:
     # Si el push falla con un error de permisos, revisa en tu repo:
     # Settings → Actions → General → Workflow permissions →
     # "Read and write permissions".
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+    # Evita que dos ejecuciones se pisen (por ejemplo si lanzas una a
+    # mano justo cuando le toca a la programada) — la segunda espera
+    # en cola en vez de arrancar en paralelo y chocar al hacer commit.
 
 jobs:
   update-data:
@@ -44,5 +51,9 @@ jobs:
             echo "Sin cambios en los datos, no se commitea nada."
           else
             git commit -m "Actualizar data.json [bot]"
+            # Por si el repo cambió desde el checkout (alguien commiteó
+            # a mano mientras corría el Action), sincronizamos antes de
+            # empujar en vez de fallar directamente.
+            git pull --rebase origin main
             git push
           fi
