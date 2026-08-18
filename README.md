@@ -1,10 +1,19 @@
-# Riftbound JGT — stats
+# Riftbound JGT — Archivo de partidas
 
 Página estática (GitHub Pages) que muestra estadísticas de las partidas de **Riftbound** que juega el grupo: ranking de jugadores, winrate por leyenda, matriz de matchups, battlefields más usados, historial, notas/amenazas por leyenda y una "porra" de predicciones. Los datos se rellenan con un Google Form y se sincronizan solos a la web — nadie tiene que tocar código para que se actualice.
 
 **Nombre del grupo en la web:** JGT Enjoyers.
 
 ---
+
+## Cambios recientes
+
+**Revisión de fiabilidad (última pasada):**
+- El script de Node (`scripts/fetch-sheet.js`) ahora tiene un timeout de 20s por si Google no responde, y se niega a sobrescribir `data.json` si la hoja devolviera 0 filas (para no borrar el historial por un fallo pasajero de permisos).
+- El workflow evita ejecuciones solapadas (`concurrency`) y hace `git pull --rebase` de seguridad antes de empujar el commit.
+- En `script.js` se unificó el escapado de texto (nombres de jugador y leyenda) en todas las vistas — antes algunas lo hacían y otras no, lo cual era inconsistente aunque no llegara a causar problemas visibles.
+- Limpieza general: numeración de secciones del código corregida, una regla CSS que ya no se usaba (`.section__num`, de cuando había números romanos) eliminada, y una estructura de datos interna un poco chapucera (`rounds._matches`) sustituida por algo más claro.
+- Cron de la GitHub Action bajado de 30 a 15 minutos.
 
 ## Cómo fluyen los datos
 
@@ -13,7 +22,7 @@ Google Form (rellena cada uno tras jugar)
         ↓
 Google Sheet, pestaña "Respuestas_formulario"  (una fila por partido, hasta 3 rondas)
         ↓
-GitHub Action "Actualizar datos de Riftbound"  (corre en el servidor de GitHub cada 30 min)
+GitHub Action "Actualizar datos de Riftbound"  (corre en el servidor de GitHub cada 15 min)
         ↓
 data.json  (se genera solo, vive en la raíz del repo)
         ↓
@@ -73,7 +82,7 @@ riftbound-jgt-stats/
 El ID y el nombre de la pestaña ya **no** están en `script.js` — viven en `.github/workflows/update-data.yml`, en las variables `SHEET_ID` y `SHEET_TAB` del paso "Descargar datos de Google Sheets".
 
 ### Forzar una actualización inmediata
-Pestaña **Actions** del repo → "Actualizar datos de Riftbound" → botón **"Run workflow"**. Si no, se actualiza sola cada 30 minutos.
+Pestaña **Actions** del repo → "Actualizar datos de Riftbound" → botón **"Run workflow"**. Si no, se actualiza sola cada 15 minutos.
 
 ### Añadir la foto de un jugador
 Sube el archivo a `assets/imgs/` con el nombre `<nombre_normalizado>_wins.<extensión>` (minúsculas, sin tildes, espacios convertidos en `_`). Ejemplos: `alvaro_wins.jpg`, `dani_gt_wins.png`, `noe_wins.jpg`. El sistema prueba automáticamente `.jpg`, `.jpeg`, `.png` y `.webp` en ese orden. Si no encuentra la foto de alguien, usa `generic_wins.<ext>` como respaldo — si tampoco existe, simplemente no muestra imagen (sin icono roto).
