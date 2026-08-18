@@ -74,6 +74,7 @@ function buildRounds(rawRows) {
   // Cada fila del formulario = 1 partido (hasta 3 rondas).
   // La "desenrollamos" en 1 fila por ronda jugada.
   const rounds = [];
+  const matches = [];
 
   rawRows.forEach((row, matchIndex) => {
     const jugador = row["Jugador"];
@@ -118,8 +119,7 @@ function buildRounds(rawRows) {
     else if (victoriasRival > victoriasJugador) ganador = rival;
     else ganador = null; // empate de partido
 
-    rounds._matches = rounds._matches || [];
-    rounds._matches.push({
+    matches.push({
       matchIndex, marca: row["Marca temporal"],
       jugador, rival, leyendaJugador, leyendaRival,
       formato, jugadas, victoriasJugador, victoriasRival, ganador,
@@ -130,7 +130,7 @@ function buildRounds(rawRows) {
     });
   });
 
-  return { rounds, matches: rounds._matches || [] };
+  return { rounds, matches };
 }
 
 /* ============================================================
@@ -235,11 +235,11 @@ function renderKPIs({ matches, leaderboard, leyendaWinrate }) {
       <span class="kpi__label">Partidas registradas</span>
     </div>
     <div class="kpi">
-      <span class="kpi__value">${lider ? lider.nombre : "—"}</span>
+      <span class="kpi__value">${lider ? escapeHtml(lider.nombre) : "—"}</span>
       <span class="kpi__label">Jugador líder ${lider ? `(${fmtPct(lider.winrate)})` : ""}</span>
     </div>
     <div class="kpi">
-      <span class="kpi__value">${leyendaTop ? leyendaTop.leyenda : "—"}</span>
+      <span class="kpi__value">${leyendaTop ? escapeHtml(leyendaTop.leyenda) : "—"}</span>
       <span class="kpi__label">Leyenda más jugada</span>
     </div>
     <div class="kpi">
@@ -347,7 +347,7 @@ function renderLeaderboard(leaderboard) {
   el.innerHTML = leaderboard.map((p, i) => `
     <div class="leaderboard__row leaderboard__row--${i + 1}">
       <span class="leaderboard__rank">${i + 1}</span>
-      <span class="leaderboard__name">${p.nombre}</span>
+      <span class="leaderboard__name">${escapeHtml(p.nombre)}</span>
       <span class="leaderboard__record">${p.ganados}V - ${p.perdidos}D${p.empatados ? ` - ${p.empatados}E` : ""} · ${p.jugados} partidas</span>
       <span class="leaderboard__bar-wrap"><span class="leaderboard__bar" style="width:${Math.round(p.winrate * 100)}%"></span></span>
       <span class="leaderboard__pct">${fmtPct(p.winrate)}</span>
@@ -366,7 +366,7 @@ function renderLeyendas(leyendaWinrate) {
     const color = colorForWinrate(l.winrate);
     return `
       <div class="leyenda-row">
-        <span class="leyenda-row__name">${l.leyenda}</span>
+        <span class="leyenda-row__name">${escapeHtml(l.leyenda)}</span>
         <span class="leyenda-row__track">
           <span class="leyenda-row__fill" style="width:${Math.round(l.winrate * 100)}%; background:${color}"></span>
         </span>
@@ -396,22 +396,22 @@ function renderMatrix({ leyendas, pares }) {
   }
 
   let html = `<table class="matrix"><thead><tr><th></th>`;
-  leyendas.forEach(l => { html += `<th>${l}</th>`; });
+  leyendas.forEach(l => { html += `<th>${escapeHtml(l)}</th>`; });
   html += `</tr></thead><tbody>`;
 
   leyendas.forEach(a => {
-    html += `<tr><th>${a}</th>`;
+    html += `<tr><th>${escapeHtml(a)}</th>`;
     leyendas.forEach(b => {
       if (a === b) { html += `<td class="cell cell--empty">–</td>`; return; }
       const cell = pares[a] && pares[a][b];
       if (!cell || cell.jugadas < CONFIG.MIN_MATCHES_MATRIX) {
         const info = cell ? `${cell.victorias}/${cell.jugadas}` : "0/0";
-        html += `<td class="cell cell--empty" title="${a} vs ${b}: ${info} partidas">–</td>`;
+        html += `<td class="cell cell--empty" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${info} partidas">–</td>`;
         return;
       }
       const wr = cell.victorias / cell.jugadas;
       const color = colorForWinrate(wr, VICTORY_COLOR);
-      html += `<td class="cell" style="background:${color}" title="${a} vs ${b}: ${fmtPct(wr)} (${cell.victorias}/${cell.jugadas})">${Math.round(wr * 100)}</td>`;
+      html += `<td class="cell" style="background:${color}" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${fmtPct(wr)} (${cell.victorias}/${cell.jugadas})">${Math.round(wr * 100)}</td>`;
     });
     html += `</tr>`;
   });
@@ -440,10 +440,10 @@ function renderHistory(matches) {
       <div class="history__item">
         <span class="history__date">${fecha}<br>${m.formato}</span>
         <span class="history__matchup">
-          <b>${m.jugador}</b> (${m.leyendaJugador || "?"}) <span class="vs">vs</span>
-          <b>${m.rival}</b> (${m.leyendaRival || "?"})
+          <b>${escapeHtml(m.jugador)}</b> (${escapeHtml(m.leyendaJugador || "?")}) <span class="vs">vs</span>
+          <b>${escapeHtml(m.rival)}</b> (${escapeHtml(m.leyendaRival || "?")})
         </span>
-        <span class="history__score history__score--${scoreClass}">${scoreLabel} · ${m.victoriasJugador}-${m.victoriasRival}</span>
+        <span class="history__score history__score--${scoreClass}">${escapeHtml(scoreLabel)} · ${m.victoriasJugador}-${m.victoriasRival}</span>
       </div>
     `;
   }).join("");
@@ -637,11 +637,7 @@ function setupTabs() {
 }
 
 /* ============================================================
-   6. Init
-   ============================================================ */
-
-/* ============================================================
-   7. Gameplan — matchups de una leyenda + amenazas al hacer clic
+   6. Gameplan — matchups de una leyenda + amenazas al hacer clic
    ============================================================ */
 
 function renderGameplan(matrix, matches) {
@@ -807,11 +803,7 @@ function renderGameplanDetail(myLeyenda, enemyLeyenda, matches) {
 }
 
 /* ============================================================
-   8. Init
-   ============================================================ */
-
-/* ============================================================
-   8. Battlefields
+   7. Battlefields
    ============================================================ */
 
 function computeBattlefieldStats(rounds) {
@@ -887,7 +879,7 @@ function renderBattlefields(stats) {
 }
 
 /* ============================================================
-   9. Init
+   8. Init
    ============================================================ */
 
 async function init() {
