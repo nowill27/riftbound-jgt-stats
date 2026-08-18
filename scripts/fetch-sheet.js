@@ -25,7 +25,24 @@ if (!SHEET_ID) {
 async function main() {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}`;
 
-  const res = await fetch(url);
+  // Timeout de seguridad: sin esto, un fallo de red raro dejaría el
+  // Action colgado consumiendo minutos de Actions hasta el límite
+  // por defecto de GitHub (varias horas) en vez de fallar rápido.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20_000);
+
+  let res;
+  try {
+    res = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("Tiempo de espera agotado (20s) al conectar con Google Sheets.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} al leer la hoja "${SHEET_TAB}". Revisa SHEET_ID y que la hoja tenga permiso de lectura para "cualquiera con el enlace".`);
   }
@@ -40,6 +57,10 @@ async function main() {
   }
 
   const data = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
+  if (!data.table || !Array.isArray(data.table.cols) || !Array.isArray(data.table.rows)) {
+    throw new Error(`La respuesta de Google no tiene el formato esperado (¿existe la pestaña "${SHEET_TAB}"?).`);
+  }
+
   const labels = data.table.cols.map(c => (c.label || "").trim());
 
   const rows = data.table.rows
@@ -52,6 +73,14 @@ async function main() {
       return obj;
     })
     .filter(row => Object.values(row).some(v => v !== null && v !== ""));
+
+  // Si Google devuelve 0 filas es casi siempre un problema pasajero
+  // (permisos, pestaña renombrada...), no que el grupo haya borrado
+  // todas sus partidas. Mejor fallar y conservar el data.json anterior
+  // que sobrescribirlo con algo vacío.
+  if (rows.length === 0) {
+    throw new Error("La hoja devolvió 0 filas — no se sobrescribe data.json por seguridad. Si de verdad no hay partidas todavía, ignora este aviso.");
+  }
 
   const output = {
     generatedAt: new Date().toISOString(),
