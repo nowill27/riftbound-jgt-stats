@@ -1,1 +1,48 @@
+name: Actualizar datos de Riftbound
 
+on:
+  schedule:
+    # Cada 30 minutos. GitHub puede retrasar la ejecución en horas de
+    # mucha carga — no es un cron exacto al segundo, pero de sobra
+    # para este uso. Formato: minuto hora día mes día-semana.
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+    # Permite lanzarlo a mano en cualquier momento desde
+    # GitHub → pestaña "Actions" → "Actualizar datos de Riftbound" → "Run workflow"
+
+permissions:
+  contents: write
+    # Necesario para que el propio Action pueda commitear data.json.
+    # Si el push falla con un error de permisos, revisa en tu repo:
+    # Settings → Actions → General → Workflow permissions →
+    # "Read and write permissions".
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Descargar datos de Google Sheets
+        env:
+          SHEET_ID: "1fqDXw0rzwc9KM2VKaLbXHS1RPgV6NR_3FkCOVkbFxic"
+          SHEET_TAB: "Respuestas_formulario"
+        run: node scripts/fetch-sheet.js
+
+      - name: Commitear data.json si ha cambiado
+        run: |
+          git config user.name "riftbound-bot"
+          git config user.email "actions@github.com"
+          git add data.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios en los datos, no se commitea nada."
+          else
+            git commit -m "Actualizar data.json [bot]"
+            git push
+          fi
