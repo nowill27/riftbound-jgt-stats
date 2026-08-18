@@ -8,8 +8,11 @@ Página estática (GitHub Pages) que muestra estadísticas de las partidas de **
 
 ## Cambios recientes
 
+**Reorganización de carpetas:**
+- `fetch-sheet.js` se movió de `scripts/` a `.github/scripts/` — al ser un script que solo usa el propio GitHub Action (nunca se sirve a los visitantes de la web), tiene más sentido que viva dentro de `.github/`, separado con claridad de `script.js` (que sí es parte del sitio y corre en el navegador). Si tenías la carpeta `scripts/` en tu repo, ya no hace falta — bórrala tras subir los cambios.
+
 **Revisión de fiabilidad (última pasada):**
-- El script de Node (`scripts/fetch-sheet.js`) ahora tiene un timeout de 20s por si Google no responde, y se niega a sobrescribir `data.json` si la hoja devolviera 0 filas (para no borrar el historial por un fallo pasajero de permisos).
+- El script de Node (`.github/scripts/fetch-sheet.js`) ahora tiene un timeout de 20s por si Google no responde, y se niega a sobrescribir `data.json` si la hoja devolviera 0 filas (para no borrar el historial por un fallo pasajero de permisos).
 - El workflow evita ejecuciones solapadas (`concurrency`) y hace `git pull --rebase` de seguridad antes de empujar el commit.
 - En `script.js` se unificó el escapado de texto (nombres de jugador y leyenda) en todas las vistas — antes algunas lo hacían y otras no, lo cual era inconsistente aunque no llegara a causar problemas visibles.
 - Limpieza general: numeración de secciones del código corregida, una regla CSS que ya no se usaba (`.section__num`, de cuando había números romanos) eliminada, y una estructura de datos interna un poco chapucera (`rounds._matches`) sustituida por algo más claro.
@@ -37,8 +40,9 @@ script.js lo lee al cargar la página y calcula todo en el navegador
 
 ```
 riftbound-jgt-stats/
-├── .github/workflows/update-data.yml   → tarea automática que genera data.json
-├── scripts/fetch-sheet.js              → script que descarga el Sheet y lo convierte a JSON
+├── .github/
+│   ├── workflows/update-data.yml       → tarea automática que genera data.json
+│   └── scripts/fetch-sheet.js          → script que descarga el Sheet y lo convierte a JSON
 ├── data.json                           → generado solo, NO se edita a mano
 ├── index.html                          → estructura de la página (pestañas y secciones)
 ├── style.css                           → todo el diseño visual
